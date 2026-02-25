@@ -73,9 +73,9 @@ export async function POST(request: Request) {
     await browser.close()
 
     // Converter para Base64
-    const blBase64 = blPdf.toString('base64')
-    const paymentBase64 = paymentPdf.toString('base64')
-    const invoiceBase64 = invoicePdf.toString('base64')
+    const blBase64 = Buffer.from(blPdf).toString('base64')
+    const paymentBase64 = Buffer.from(paymentPdf).toString('base64')
+    const invoiceBase64 = Buffer.from(invoicePdf).toString('base64')
 
     return NextResponse.json({
       success: true,
