@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import Link from 'next/link'  
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -28,8 +28,22 @@ function formatBytes(bytes: number | null): string {
 export default function FormularyDocsPage() {
   const [searchQuery, setSearchQuery] = useState('')
 
-  const { data: documentos = [], isLoading: listLoading } = trpc.documentos.list.useQuery()
+  const { data: grupos = [], isLoading: listLoading } = trpc.documentos.list.useQuery()
 
+  const gruposFiltrados = useMemo(() => {
+    if (!grupos || grupos.length === 0) return []
+    if (!searchQuery.trim()) return grupos
+    const q = searchQuery.trim().toLowerCase()
+    return grupos.filter((g: any) => {
+      const parts: string[] = []
+      if (g.bl?.originalName) parts.push(g.bl.originalName)
+      if (g.invoice?.originalName) parts.push(g.invoice.originalName)
+      if (g.payment?.originalName) parts.push(g.payment.originalName)
+      return parts.some((p) => p.toLowerCase().includes(q))
+    })
+  }, [grupos, searchQuery])
+
+  const totalDocumentos = grupos?.length ?? 0
 
   return (
     <Card className="overflow-hidden">
@@ -44,13 +58,13 @@ export default function FormularyDocsPage() {
               Listagem dos arquivos em /upload. Clique no link para abrir ou baixar.
             </CardDescription>
           </div>
-          {!listLoading && documentos.length > 0 && (
+          {!listLoading && totalDocumentos > 0 && (
             <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-              {documentos.length} {documentos.length === 1 ? 'documento' : 'documentos'}
+              {totalDocumentos} {totalDocumentos === 1 ? 'lote de documentos' : 'lotes de documentos'}
             </span>
           )}
         </div>
-        {!listLoading && documentos.length > 0 && (
+        {!listLoading && totalDocumentos > 0 && (
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -74,13 +88,13 @@ export default function FormularyDocsPage() {
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
-        ) : documentos.length === 0 ? (
+        ) : totalDocumentos === 0 ? (
           <div className="text-center py-16 text-muted-foreground">
             <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
             <p className="font-medium">Nenhum documento cadastrado</p>
             <p className="text-sm mt-1">Os arquivos gerados e salvos no servidor aparecerão aqui.</p>
           </div>
-        ) : documentos.length === 0 ? (
+        ) : gruposFiltrados.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground">
             <Search className="h-12 w-12 mx-auto mb-3 opacity-50" />
             <p className="font-medium">Nenhum resultado para &quot;{searchQuery}&quot;</p>
@@ -94,53 +108,96 @@ export default function FormularyDocsPage() {
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="font-semibold">Nome / Arquivo</TableHead>
-                  <TableHead className="hidden sm:table-cell font-semibold w-24">Tamanho</TableHead>
+                  <TableHead className="font-semibold w-40">Data</TableHead>
+                  <TableHead className="font-semibold">BL</TableHead>
+                  <TableHead className="font-semibold">Invoice</TableHead>
+                  <TableHead className="font-semibold">Pagamento</TableHead>
+                  <TableHead className="hidden sm:table-cell font-semibold w-24 text-right">Tamanho total</TableHead>
                   <TableHead className="hidden md:table-cell font-semibold w-36">Enviado</TableHead>
-                  <TableHead className="w-14 font-semibold"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {documentos.map((doc) => (
-                  <TableRow key={doc.id} className="group">
-                    <TableCell>
-                      <div className="flex min-w-0 items-center gap-2">
-                        <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                        <div className="min-w-0">
-                          <span className="font-medium truncate block">
-                            {doc.originalName || doc.filename}
-                          </span>
-                          {doc.originalName && doc.originalName !== doc.filename && (
-                            <span className="block text-xs text-muted-foreground truncate">
-                              {doc.filename}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell text-muted-foreground tabular-nums">
-                      {formatBytes(doc.sizeInBytes)}
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
-                      {formatDistanceToNow(new Date(doc.createdAt), {
-                        addSuffix: true,
-                        locale: ptBR,
-                      })}
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                        <Link
-                          href={`/upload/${doc.filename}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title="Abrir arquivo"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {gruposFiltrados.map((grupo: any) => {
+                  const createdAt = new Date(grupo.createdAt)
+                  const totalSize =
+                    (grupo.bl?.sizeInBytes ?? 0) +
+                    (grupo.invoice?.sizeInBytes ?? 0) +
+                    (grupo.payment?.sizeInBytes ?? 0)
+
+                  return (
+                    <TableRow key={grupo.id} className="group">
+                      <TableCell className="align-top whitespace-nowrap text-sm text-muted-foreground">
+                        {createdAt.toLocaleDateString('pt-BR')}<br />
+                        <span className="text-xs">
+                          {createdAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </TableCell>
+                      <TableCell className="align-top">
+                        {grupo.bl ? (
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                            <Button variant="link" className="h-auto p-0 text-sm font-normal" asChild>
+                              <Link
+                                href={`/upload/${grupo.bl.filename}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {grupo.bl.originalName || grupo.bl.filename}
+                              </Link>
+                            </Button>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="align-top">
+                        {grupo.invoice ? (
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                            <Button variant="link" className="h-auto p-0 text-sm font-normal" asChild>
+                              <Link
+                                href={`/upload/${grupo.invoice.filename}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {grupo.invoice.originalName || grupo.invoice.filename}
+                              </Link>
+                            </Button>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="align-top">
+                        {grupo.payment ? (
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                            <Button variant="link" className="h-auto p-0 text-sm font-normal" asChild>
+                              <Link
+                                href={`/upload/${grupo.payment.filename}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {grupo.payment.originalName || grupo.payment.filename}
+                              </Link>
+                            </Button>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell align-top text-right text-muted-foreground tabular-nums">
+                        {totalSize ? formatBytes(totalSize) : '—'}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell align-top text-muted-foreground text-sm">
+                        {formatDistanceToNow(createdAt, {
+                          addSuffix: true,
+                          locale: ptBR,
+                        })}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
           </div>

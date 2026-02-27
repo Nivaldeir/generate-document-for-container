@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -59,6 +59,8 @@ const formDocSchema = z.object({
   issueDate: z.string().optional(),
   paymentDate: z.string(),
   invoiceDate: z.string(),
+  logoUrl: z.string().optional(),
+  signatureUrl: z.string().optional(),
 })
 
 type FormDocValues = z.infer<typeof formDocSchema>
@@ -108,13 +110,71 @@ const defaultValues: FormDocValues = {
 export default function HomePage() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [signaturePreview, setSignaturePreview] = useState<string | null>(null)
 
   const form = useForm<FormDocValues>({
     resolver: zodResolver(formDocSchema),
     defaultValues,
   })
 
-  const generateAndSavePDF = async (type: string, filename: string, data: FormDocValues) => {
+  const handleLogoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) return
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const result = reader.result
+      if (typeof result !== 'string') return
+      setLogoPreview(result)
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('form-logo', result)
+      }
+      form.setValue('logoUrl', result)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleSignatureChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) return
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const result = reader.result
+      if (typeof result !== 'string') return
+      setSignaturePreview(result)
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('form-signature', result)
+      }
+      form.setValue('signatureUrl', result)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const storedLogo = window.localStorage.getItem('form-logo')
+    if (storedLogo) {
+      setLogoPreview(storedLogo)
+      form.setValue('logoUrl', storedLogo)
+    }
+    const storedSignature = window.localStorage.getItem('form-signature')
+    if (storedSignature) {
+      setSignaturePreview(storedSignature)
+      form.setValue('signatureUrl', storedSignature)
+    }
+  }, [form])
+
+  const generateAndSavePDF = async (
+    type: string,
+    filename: string,
+    data: FormDocValues,
+    batchId: string,
+    kind: 'bl' | 'payment' | 'invoice',
+  ) => {
     const response = await fetch('/api/download-pdf', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -130,29 +190,12 @@ export default function HomePage() {
     const { default: jsPDF } = await import('jspdf')
     const html2canvas = (await import('html2canvas')).default
 
-    const wrapper = document.createElement('div')
-    wrapper.setAttribute('aria-hidden', 'true')
-    Object.assign(wrapper.style, {
-      position: 'fixed',
-      left: '0',
-      top: '0',
-      width: '210mm',
-      height: '297mm',
-      overflow: 'hidden',
-      visibility: 'hidden',
-      pointerEvents: 'none',
-      zIndex: '-9999',
-      isolation: 'isolate',
-    })
-
     const tempDiv = document.createElement('div')
     tempDiv.innerHTML = html
+    tempDiv.style.position = 'absolute'
+    tempDiv.style.left = '-9999px'
     tempDiv.style.width = '210mm'
-    wrapper.appendChild(tempDiv)
-    document.body.appendChild(wrapper)
-
-    const prevOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    document.body.appendChild(tempDiv)
 
     try {
       const canvas = await html2canvas(tempDiv, {
@@ -167,25 +210,31 @@ export default function HomePage() {
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight)
 
       const blob = pdf.output('blob')
-      const form = new FormData()
-      form.append('file', blob, filename)
-      form.append('originalName', filename)
-      await fetch('/api/documentos', { method: 'POST', body: form })
+      const formData = new FormData()
+      formData.append('file', blob, filename)
+      formData.append('originalName', filename)
+      formData.append('batchId', batchId)
+      formData.append('kind', kind)
+      await fetch('/api/documentos', { method: 'POST', body: formData })
     } finally {
-      document.body.style.overflow = prevOverflow
-      wrapper.remove()
+      document.body.removeChild(tempDiv)
     }
   }
 
   const onSubmit = async (data: FormDocValues) => {
     setLoading(true)
     setSuccess(false)
+    const batchId =
+      typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`
+
     try {
-      await generateAndSavePDF('bl', `BL-${data.blNumber}.pdf`, data)
+      await generateAndSavePDF('bl', `BL-${data.blNumber}.pdf`, data, batchId, 'bl')
       await new Promise(resolve => setTimeout(resolve, 300))
-      await generateAndSavePDF('payment', `Pagamento-Frete-${data.invoiceNumber}.pdf`, data)
+      await generateAndSavePDF('payment', `Pagamento-Frete-${data.invoiceNumber}.pdf`, data, batchId, 'payment')
       await new Promise(resolve => setTimeout(resolve, 300))
-      await generateAndSavePDF('invoice', `Invoice-${data.invoiceNumber}.pdf`, data)
+      await generateAndSavePDF('invoice', `Invoice-${data.invoiceNumber}.pdf`, data, batchId, 'invoice')
       setSuccess(true)
     } catch (error) {
       console.error('[v0] Erro ao processar requisição:', error)
@@ -205,6 +254,61 @@ export default function HomePage() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Identidade visual (opcional)</CardTitle>
+              <CardDescription>
+                Logo da empresa e assinatura digital que serão usados nos documentos gerados.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <FormLabel>Logo da empresa</FormLabel>
+                {logoPreview && (
+                  <div className="flex items-center gap-4">
+                    <div className="border rounded-md bg-white p-2">
+                      <img
+                        src={logoPreview}
+                        alt="Logo atual"
+                        className="h-16 w-auto object-contain"
+                      />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Logo atual. Envie outro arquivo se quiser trocar.
+                    </p>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <FormControl>
+                    <Input type="file" accept="image/*" onChange={handleLogoChange} />
+                  </FormControl>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <FormLabel>Assinatura (imagem)</FormLabel>
+                {signaturePreview && (
+                  <div className="flex items-center gap-4">
+                    <div className="border rounded-md bg-white p-2">
+                      <img
+                        src={signaturePreview}
+                        alt="Assinatura atual"
+                        className="h-12 w-auto object-contain"
+                      />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Assinatura atual. Envie outra imagem se quiser trocar.
+                    </p>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <FormControl>
+                    <Input type="file" accept="image/*" onChange={handleSignatureChange} />
+                  </FormControl>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader>
               <CardTitle>Dados do Shipper/Exportador</CardTitle>

@@ -12,6 +12,8 @@ export async function POST(request: Request) {
     const formData = await request.formData()
     const file = formData.get('file') as File | null
     const originalName = (formData.get('originalName') as string) || 'documento.pdf'
+    const batchId = (formData.get('batchId') as string) || null
+    const kind = (formData.get('kind') as string) || null
 
     if (!file || !(file instanceof File)) {
       return NextResponse.json(
@@ -33,6 +35,8 @@ export async function POST(request: Request) {
         originalName: originalName || filename,
         mimeType: MIME_PDF,
         sizeInBytes: buffer.length,
+        batchId,
+        kind,
       },
     })
 
