@@ -64,6 +64,13 @@
       font-size: 14px;
       font-weight: bold;
     }
+    .brand-logo {
+      max-height: 40px;
+      max-width: 80px;
+      object-fit: contain;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
     .checkbox-row {
       margin: 10px 0;
     }
@@ -94,6 +101,9 @@
 <body>
   <div class="page-inner">
   <div class="company-header">
+    <% if (typeof logoUrl !== 'undefined' && logoUrl) { %>
+      <img src="<%= logoUrl %>" alt="Logo" class="brand-logo" />
+    <% } %>
     <div class="company-name"><%= brazilBiName %></div>
     <div><%= brazilBiAddress %></div>
     <div>CNPJ: <%= brazilBiCnpj %></div>
@@ -185,5 +195,18 @@
     <div style="margin-top: 5px;">CNPJ: <%= brazilBiCnpj %></div>
   </div>
   </div>
+  
+  <% if (typeof signatureUrl !== 'undefined' && signatureUrl) { %>
+    <div style="margin-top: 24px; text-align: right;">
+      <div style="display: inline-block; text-align: center;">
+        <img
+          src="<%= signatureUrl %>"
+          alt="Signature"
+          style="max-height: 40px; max-width: 120px; object-fit: contain; display: block; margin: 0 auto 4px;"
+        />
+        <div style="border-top: 1px solid #000; font-size: 10px; padding-top: 4px;">Signature</div>
+      </div>
+    </div>
+  <% } %>
 </body>
 </html>
