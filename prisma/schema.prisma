@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String         @id @default(cuid())
+  email     String         @unique
+  password  String
+  name      String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  files     UploadedFile[]
+}
+
+model UploadedFile {
+  id           String   @id @default(cuid())
+  filename     String
+  originalName String?
+  mimeType     String?
+  sizeInBytes  Int?
+  batchId      String?
+  kind         String?
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+}
