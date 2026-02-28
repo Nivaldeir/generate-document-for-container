@@ -1,7 +1,7 @@
-import { router, protectedProcedure } from '../trpc'
+import { router, publicProcedure } from '../trpc'
 
 export const documentosRouter = router({
-  list: protectedProcedure.query(async ({ ctx }) => {
+  list: publicProcedure.query(async ({ ctx }) => {
     const files = await ctx.prisma.uploadedFile.findMany({
       orderBy: { createdAt: 'desc' },
       select: {

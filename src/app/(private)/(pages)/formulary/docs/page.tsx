@@ -138,7 +138,7 @@ export default function FormularyDocsPage() {
                             <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
                             <Button variant="link" className="h-auto p-0 text-sm font-normal" asChild>
                               <Link
-                                href={`/upload/${grupo.bl.filename}`}
+                                href={`/api/documentos/download?filename=${encodeURIComponent(grupo.bl.filename)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
@@ -156,7 +156,7 @@ export default function FormularyDocsPage() {
                             <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
                             <Button variant="link" className="h-auto p-0 text-sm font-normal" asChild>
                               <Link
-                                href={`/upload/${grupo.invoice.filename}`}
+                                href={`/api/documentos/download?filename=${encodeURIComponent(grupo.invoice.filename)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
@@ -174,7 +174,7 @@ export default function FormularyDocsPage() {
                             <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
                             <Button variant="link" className="h-auto p-0 text-sm font-normal" asChild>
                               <Link
-                                href={`/upload/${grupo.payment.filename}`}
+                                href={`/api/documentos/download?filename=${encodeURIComponent(grupo.payment.filename)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >

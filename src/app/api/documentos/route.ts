@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
-import { randomUUID } from 'crypto'
 import { prisma } from '@/src/shared/lib/prisma'
+import { MinioS3 } from '@/src/shared/lib/minio'
 
-const UPLOAD_DIR = join(process.cwd(), 'public', 'upload')
 const MIME_PDF = 'application/pdf'
 
 export async function POST(request: Request) {
@@ -23,16 +20,17 @@ export async function POST(request: Request) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer())
-    const filename = `${randomUUID()}.pdf`
-    const filepath = join(UPLOAD_DIR, filename)
-
-    await mkdir(UPLOAD_DIR, { recursive: true })
-    await writeFile(filepath, buffer)
+    const { objectName, url } = await MinioS3.uploadWithUniqueName({
+      fileName: originalName,
+      buffer,
+      contentType: MIME_PDF,
+      prefix: 'documentos',
+    })
 
     const record = await prisma.uploadedFile.create({
       data: {
-        filename,
-        originalName: originalName || filename,
+        filename: objectName,
+        originalName: originalName || objectName,
         mimeType: MIME_PDF,
         sizeInBytes: buffer.length,
         batchId,
@@ -44,7 +42,7 @@ export async function POST(request: Request) {
       id: record.id,
       filename: record.filename,
       originalName: record.originalName,
-      url: `/upload/${record.filename}`,
+      url: url || `/api/documentos/download?filename=${encodeURIComponent(record.filename)}`,
     })
   } catch (error) {
     console.error('[api/documentos] POST', error)
