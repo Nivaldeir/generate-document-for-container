@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { signOut } from 'next-auth/react'
 import {
   Sidebar,
   SidebarContent,
@@ -35,7 +36,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-                <Link href="/"> <DoorOpen className="h-4 w-4" /> <span>Sair</span></Link>
+                <Link href="/"></Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -67,12 +68,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip="Sair"
-              onClick={() => {
-                if (typeof window !== 'undefined') {
-                  localStorage.removeItem('isAuthenticated')
-                  window.location.href = '/auth'
-                }
-              }}
+              onClick={() => signOut({ callbackUrl: '/auth' })}
             >
               <DoorOpen className="h-4 w-4" />
               <span>Sair</span>

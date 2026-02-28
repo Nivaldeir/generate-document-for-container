@@ -1,11 +1,20 @@
 'use client'
 
 import type { SubmitHandler } from 'react-hook-form'
+import { useState } from 'react'
 import { Button } from '@/src/shared/components/ui/button'
 import { Input } from '@/src/shared/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/shared/components/ui/card'
 import { Textarea } from '@/src/shared/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/src/shared/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/src/shared/components/ui/dialog'
 import {
   Form,
   FormControl,
@@ -20,6 +29,8 @@ import { useHomeHook } from './hook/use-home.hook'
 
 export default function HomePage() {
   const { form, handleAssetChange, uploadingLogo, uploadingSignature, logoPreview, signaturePreview, onSubmit, loading, success } = useHomeHook()
+  const [containerModalOpen, setContainerModalOpen] = useState(false)
+  const [containerCountInput, setContainerCountInput] = useState('')
 
   return (
     <div className="p-4 sm:p-8">
@@ -38,66 +49,49 @@ export default function HomePage() {
                   Logo da empresa e assinatura digital que serão usados nos documentos gerados.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <FormLabel>Logo da empresa</FormLabel>
-                  {logoPreview && (
-                    <div className="flex items-center gap-4">
-                      <div className="border rounded-md bg-white p-2">
-                        <img
-                          src={logoPreview}
-                          alt="Logo atual"
-                          className="h-16 w-auto object-contain"
-                        />
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Uma única logo (Minio). Envie outro arquivo para substituir.
-                      </p>
-                    </div>
-                  )}
+              <CardContent>
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
+                    <FormLabel className="text-sm">Logo</FormLabel>
+                    {logoPreview && (
+                      <div className="flex items-center gap-2">
+                        <div className="border rounded bg-white p-1.5 shrink-0">
+                          <img src={logoPreview} alt="Logo" className="h-10 w-auto object-contain" />
+                        </div>
+                        <span className="text-xs text-muted-foreground">Substitua enviando outro arquivo.</span>
+                      </div>
+                    )}
                     <FormControl>
                       <Input
                         type="file"
                         accept="image/*"
                         onChange={(e) => handleAssetChange(e, 'logo')}
                         disabled={uploadingLogo}
+                        className="text-sm"
                       />
                     </FormControl>
-                    {uploadingLogo && (
-                      <p className="text-sm text-muted-foreground">Enviando para Minio...</p>
-                    )}
+                    {uploadingLogo && <p className="text-xs text-muted-foreground">Enviando...</p>}
                   </div>
-                </div>
-
-                <div className="space-y-4">
-                  <FormLabel>Assinatura (imagem)</FormLabel>
-                  {signaturePreview && (
-                    <div className="flex items-center gap-4">
-                      <div className="border rounded-md bg-white p-2">
-                        <img
-                          src={signaturePreview}
-                          alt="Assinatura atual"
-                          className="h-12 w-auto object-contain"
-                        />
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Uma única assinatura (Minio). Envie outra imagem para substituir.
-                      </p>
-                    </div>
-                  )}
                   <div className="space-y-2">
+                    <FormLabel className="text-sm">Assinatura</FormLabel>
+                    {signaturePreview && (
+                      <div className="flex items-center gap-2">
+                        <div className="border rounded bg-white p-1.5 shrink-0">
+                          <img src={signaturePreview} alt="Assinatura" className="h-8 w-auto object-contain" />
+                        </div>
+                        <span className="text-xs text-muted-foreground">Substitua enviando outra imagem.</span>
+                      </div>
+                    )}
                     <FormControl>
                       <Input
                         type="file"
                         accept="image/*"
                         onChange={(e) => handleAssetChange(e, 'signature')}
                         disabled={uploadingSignature}
+                        className="text-sm"
                       />
                     </FormControl>
-                    {uploadingSignature && (
-                      <p className="text-sm text-muted-foreground">Enviando para Minio...</p>
-                    )}
+                    {uploadingSignature && <p className="text-xs text-muted-foreground">Enviando...</p>}
                   </div>
                 </div>
               </CardContent>
@@ -259,7 +253,37 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>B/L Number</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input
+                          {...field}
+                          onBlur={(e) => {
+                            field.onBlur()
+                            const value = form.getValues('blNumber')?.trim()
+                            if (value) {
+                              const current = form.getValues('containerCount')
+                              setContainerCountInput(current != null ? String(current) : '')
+                              setContainerModalOpen(true)
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="containerCount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Qtd. Containers</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={1}
+                          {...field}
+                          value={field.value ?? ''}
+                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -604,6 +628,50 @@ export default function HomePage() {
             </div>
           </form>
         </Form>
+
+        <Dialog open={containerModalOpen} onOpenChange={setContainerModalOpen}>
+          <DialogContent className="sm:max-w-[400px]">
+            <DialogHeader>
+              <DialogTitle>Quantidade de containers</DialogTitle>
+              <DialogDescription>
+                Informe quantos containers existem para o B/L {form.watch('blNumber') || ''}.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <label className="text-sm font-medium">Número de containers</label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={containerCountInput}
+                  onChange={(e) => setContainerCountInput(e.target.value)}
+                  placeholder="Ex: 6"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setContainerModalOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  const n = parseInt(containerCountInput, 10)
+                  if (!Number.isNaN(n) && n >= 1) {
+                    form.setValue('containerCount', n)
+                    setContainerModalOpen(false)
+                  }
+                }}
+              >
+                Confirmar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {success && (
           <Card className="mt-8 border-green-200 bg-green-50">
