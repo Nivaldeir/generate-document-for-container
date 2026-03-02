@@ -195,18 +195,5 @@
     <div style="margin-top: 5px;">CNPJ: <%= brazilBiCnpj %></div>
   </div>
   </div>
-  
-  <% if (typeof signatureUrl !== 'undefined' && signatureUrl) { %>
-    <div style="margin-top: 24px; text-align: right;">
-      <div style="display: inline-block; text-align: center;">
-        <img
-          src="<%= signatureUrl %>"
-          alt="Signature"
-          style="max-height: 40px; max-width: 120px; object-fit: contain; display: block; margin: 0 auto 4px;"
-        />
-        <div style="border-top: 1px solid #000; font-size: 10px; padding-top: 4px;">Signature</div>
-      </div>
-    </div>
-  <% } %>
 </body>
 </html>

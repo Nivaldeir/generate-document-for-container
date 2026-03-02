@@ -1,7 +1,7 @@
 'use client'
 
 import type { SubmitHandler } from 'react-hook-form'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/src/shared/components/ui/button'
 import { Input } from '@/src/shared/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/shared/components/ui/card'
@@ -26,11 +26,28 @@ import {
 import { FileText, Loader2 } from 'lucide-react'
 import type { FormDocValues } from './utils/home.utils'
 import { useHomeHook } from './hook/use-home.hook'
+import { useHomeAction } from './hook/use-home.action'
 
 export default function HomePage() {
-  const { form, handleAssetChange, uploadingLogo, uploadingSignature, logoPreview, signaturePreview, onSubmit, loading, success } = useHomeHook()
-  const [containerModalOpen, setContainerModalOpen] = useState(false)
-  const [containerCountInput, setContainerCountInput] = useState('')
+  const {
+    form,
+    handleAssetChange,
+    uploadingLogo,
+    uploadingSignature,
+    logoPreview,
+    signaturePreview,
+    onSubmit,
+    loading,
+    success,
+    trackingOpen,
+    setTrackingOpen,
+    trackingLoading,
+    trackingResult,
+    trackingError,
+  } = useHomeHook()
+
+  const { trackBl, handleOpenUsedModal } = useHomeAction()
+  const [isLoading, setIsLoading] = useState(false)
 
   return (
     <div className="p-4 sm:p-8">
@@ -42,6 +59,545 @@ export default function HomePage() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit as SubmitHandler<FormDocValues>)} className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Dados do Shipper/Exportador</CardTitle>
+                <CardDescription>Informações do remetente da carga</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="shipperName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome Completo</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="shipperCnpj"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CNPJ</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="shipperAddress"
+                  render={({ field }) => (
+                    <FormItem className="sm:col-span-2">
+                      <FormLabel>Endereço Completo</FormLabel>
+                      <FormControl>
+                        <Textarea disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Dados do Consignee</CardTitle>
+                <CardDescription>Informações do destinatário</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="consigneeName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="consigneeAddress"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Endereço</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Brazil Business Intelligence</CardTitle>
+                <CardDescription>Dados do agente no Brasil</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="brazilBiName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="brazilBiCnpj"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CNPJ</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="brazilBiAddress"
+                  render={({ field }) => (
+                    <FormItem className="sm:col-span-2">
+                      <FormLabel>Endereço</FormLabel>
+                      <FormControl>
+                        <Textarea disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Dados de Transporte</CardTitle>
+                <CardDescription>Informações do BL e embarcação</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <FormField
+                  control={form.control}
+                  name="bookingNo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Booking No.</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="blNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>B/L Number</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            {...field}
+                            disabled={isLoading}
+                            className="pr-10"
+                            onBlur={async (e) => {
+                              field.onBlur()
+                              const value = form.getValues('blNumber')?.trim()
+
+                              if (value) {
+                                try {
+                                  setIsLoading(true)
+                                  const response = await trackBl(value)
+                                  if (response?.success && response.numberContainer) {
+                                    handleOpenUsedModal(value, response.numberContainer, (number) => form.setValue('containerCount', number, {
+                                      shouldValidate: true,
+                                      shouldDirty: true,
+                                      shouldTouch: true,
+                                    }))
+                                  }
+                                } catch (error) {
+                                  console.error(error)
+                                } finally {
+                                  setIsLoading(false)
+                                }
+                              }
+                            }}
+                          />
+
+                          {isLoading && (
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                              <Loader2 className="h-5 w-5 animate-spin" />
+                            </div>
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="containerCount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Qtd. Containers</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={1}
+                          disabled={isLoading}
+                          {...field}
+                          value={field.value ?? ''}
+                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="vessel"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Navio/Viagem</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="portOfLoading"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Porto de Embarque</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="portOfDischarge"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Porto de Descarga</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="shippedOnBoardDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data de Embarque</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Dados da Carga</CardTitle>
+                <CardDescription>Descrição e quantidades</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="containers"
+                  render={({ field }) => (
+                    <FormItem className="sm:col-span-2">
+                      <FormLabel>Containers</FormLabel>
+                      <FormControl>
+                        <Textarea disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="packages"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Pacotes</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descrição</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="ncm"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>NCM</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="netWeight"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Peso Líquido (KGS)</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="grossWeight"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Peso Bruto (KGS)</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="measurement"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Medida (CBM)</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Dados Financeiros</CardTitle>
+                <CardDescription>Valores e condições de pagamento</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 sm:grid-cols-3">
+                <FormField
+                  control={form.control}
+                  name="currency"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Moeda</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="USD">USD</SelectItem>
+                          <SelectItem value="EUR">EUR</SelectItem>
+                          <SelectItem value="BRL">BRL</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="freightValue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Valor do Frete</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="incoterm"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Incoterm</FormLabel>
+                      <Select disabled={isLoading} onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="FOB">FOB</SelectItem>
+                          <SelectItem value="CIF">CIF</SelectItem>
+                          <SelectItem value="CFR">CFR</SelectItem>
+                          <SelectItem value="EXW">EXW</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="invoiceNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Número da Invoice</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="circular"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Circular</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Dados Bancários</CardTitle>
+                <CardDescription>Informações da conta beneficiária</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="beneficiaryBank"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Banco Beneficiário</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="swiftCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>SWIFT Code</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="accountNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Número da Conta</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="routingNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Routing Number</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="beneficiaryAddress"
+                  render={({ field }) => (
+                    <FormItem className="sm:col-span-2">
+                      <FormLabel>Endereço do Banco</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle>Identidade visual (opcional)</CardTitle>
@@ -96,520 +652,6 @@ export default function HomePage() {
                 </div>
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Dados do Shipper/Exportador</CardTitle>
-                <CardDescription>Informações do remetente da carga</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="shipperName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome Completo</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="shipperCnpj"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>CNPJ</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="shipperAddress"
-                  render={({ field }) => (
-                    <FormItem className="sm:col-span-2">
-                      <FormLabel>Endereço Completo</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Dados do Consignee</CardTitle>
-                <CardDescription>Informações do destinatário</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="consigneeName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="consigneeAddress"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Endereço</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Brazil Business Intelligence</CardTitle>
-                <CardDescription>Dados do agente no Brasil</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="brazilBiName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="brazilBiCnpj"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>CNPJ</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="brazilBiAddress"
-                  render={({ field }) => (
-                    <FormItem className="sm:col-span-2">
-                      <FormLabel>Endereço</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Dados de Transporte</CardTitle>
-                <CardDescription>Informações do BL e embarcação</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <FormField
-                  control={form.control}
-                  name="bookingNo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Booking No.</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="blNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>B/L Number</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          onBlur={(e) => {
-                            field.onBlur()
-                            const value = form.getValues('blNumber')?.trim()
-                            if (value) {
-                              const current = form.getValues('containerCount')
-                              setContainerCountInput(current != null ? String(current) : '')
-                              setContainerModalOpen(true)
-                            }
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="containerCount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Qtd. Containers</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={1}
-                          {...field}
-                          value={field.value ?? ''}
-                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="vessel"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Navio/Viagem</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="portOfLoading"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Porto de Embarque</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="portOfDischarge"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Porto de Descarga</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="shippedOnBoardDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Data de Embarque</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Dados da Carga</CardTitle>
-                <CardDescription>Descrição e quantidades</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="containers"
-                  render={({ field }) => (
-                    <FormItem className="sm:col-span-2">
-                      <FormLabel>Containers</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="packages"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Pacotes</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descrição</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="ncm"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>NCM</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="netWeight"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Peso Líquido (KGS)</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="grossWeight"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Peso Bruto (KGS)</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="measurement"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Medida (CBM)</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Dados Financeiros</CardTitle>
-                <CardDescription>Valores e condições de pagamento</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-3">
-                <FormField
-                  control={form.control}
-                  name="currency"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Moeda</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="USD">USD</SelectItem>
-                          <SelectItem value="EUR">EUR</SelectItem>
-                          <SelectItem value="BRL">BRL</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="freightValue"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Valor do Frete</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="incoterm"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Incoterm</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="FOB">FOB</SelectItem>
-                          <SelectItem value="CIF">CIF</SelectItem>
-                          <SelectItem value="CFR">CFR</SelectItem>
-                          <SelectItem value="EXW">EXW</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="invoiceNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Número da Invoice</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="circular"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Circular</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Dados Bancários</CardTitle>
-                <CardDescription>Informações da conta beneficiária</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="beneficiaryBank"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Banco Beneficiário</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="swiftCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>SWIFT Code</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="accountNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Número da Conta</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="routingNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Routing Number</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="beneficiaryAddress"
-                  render={({ field }) => (
-                    <FormItem className="sm:col-span-2">
-                      <FormLabel>Endereço do Banco</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
 
             <div className="flex gap-4">
               <Button type="submit" size="lg" className="flex-1" disabled={loading}>
@@ -628,46 +670,26 @@ export default function HomePage() {
             </div>
           </form>
         </Form>
-
-        <Dialog open={containerModalOpen} onOpenChange={setContainerModalOpen}>
-          <DialogContent className="sm:max-w-[400px]">
+        <Dialog open={trackingOpen} onOpenChange={setTrackingOpen}>
+          <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
-              <DialogTitle>Quantidade de containers</DialogTitle>
-              <DialogDescription>
-                Informe quantos containers existem para o B/L {form.watch('blNumber') || ''}.
-              </DialogDescription>
+              <DialogTitle>Rastreamento do B/L {form.watch('blNumber') || ''}</DialogTitle>
+              <DialogDescription>Resposta da API de rastreio (JSON bruto).</DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <label className="text-sm font-medium">Número de containers</label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={containerCountInput}
-                  onChange={(e) => setContainerCountInput(e.target.value)}
-                  placeholder="Ex: 6"
-                />
-              </div>
+            <div className="mt-2">
+              {trackingLoading ? (
+                <p className="text-sm text-muted-foreground">Consultando rastreio...</p>
+              ) : (
+                <pre className="max-h-[320px] overflow-auto rounded bg-slate-950/90 p-3 text-xs text-slate-50">
+                  {trackingError
+                    ? `Erro: ${trackingError}`
+                    : JSON.stringify(trackingResult, null, 2)}
+                </pre>
+              )}
             </div>
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setContainerModalOpen(false)}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="button"
-                onClick={() => {
-                  const n = parseInt(containerCountInput, 10)
-                  if (!Number.isNaN(n) && n >= 1) {
-                    form.setValue('containerCount', n)
-                    setContainerModalOpen(false)
-                  }
-                }}
-              >
-                Confirmar
+              <Button type="button" onClick={() => setTrackingOpen(false)}>
+                Fechar
               </Button>
             </DialogFooter>
           </DialogContent>

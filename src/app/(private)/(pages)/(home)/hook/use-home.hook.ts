@@ -18,6 +18,10 @@ export function useHomeHook() {
   const [uploadingSignature, setUploadingSignature] = useState(false)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [trackingOpen, setTrackingOpen] = useState(false)
+  const [trackingLoading, setTrackingLoading] = useState(false)
+  const [trackingResult, setTrackingResult] = useState<unknown | null>(null)
+  const [trackingError, setTrackingError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
@@ -160,5 +164,10 @@ export function useHomeHook() {
     loading,
     success,
     onSubmit,
+    trackingOpen,
+    setTrackingOpen,
+    trackingLoading,
+    trackingResult,
+    trackingError,
   }
 }
