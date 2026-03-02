@@ -26,7 +26,7 @@ export function useHomeAction() {
       return { error: `Status ${response.status}` }
     }
 
-    return { success: true, numberContainer: 23 }
+    return { success: true, numberContainer: json?.numberContainer }
 
   }
 
