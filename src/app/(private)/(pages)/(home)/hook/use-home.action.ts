@@ -12,7 +12,7 @@ export function useHomeAction() {
 
   const trackBl = async (code: string) => {
     const trimmed = code.trim()
-    if (!trimmed) return { numberContainer: undefined as number | undefined }
+    if (!trimmed) return { numberContainer: undefined as number | undefined, existed: false }
 
     try {
       const response = await fetch('/api/track', {
@@ -25,16 +25,13 @@ export function useHomeAction() {
       })
 
       const json = await response.json().catch(() => null)
-      console.log(json)
       if (!response.ok) {
-        return { numberContainer: 0 }
+        return { numberContainer: 0, existed: false }
       }
 
-      console.log(json.data)
-
-      return { numberContainer: json.data.numberOfContainers }
+      return { numberContainer: json.data.numberOfContainers, existed: true }
     } catch {
-      return { numberContainer: undefined as number | undefined }
+      return { numberContainer: undefined as number | undefined, existed: false }
     }
 
   }

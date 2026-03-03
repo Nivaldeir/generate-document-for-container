@@ -230,16 +230,18 @@ export default function HomePage() {
                                   setIsLoading(true)
                                   const response = await trackBl(value)
                                   const initialCount = response?.numberContainer ?? 0
-                                  handleOpenUsedModal(
-                                    value,
-                                    initialCount,
-                                    (number) =>
-                                      form.setValue('containerCount', number, {
-                                        shouldValidate: true,
-                                        shouldDirty: true,
-                                        shouldTouch: true,
-                                      }),
-                                  )
+                                  if (response?.existed) {
+                                    handleOpenUsedModal(
+                                      value,
+                                      initialCount,
+                                      (number) =>
+                                        form.setValue('containerCount', number, {
+                                          shouldValidate: true,
+                                          shouldDirty: true,
+                                          shouldTouch: true,
+                                        }),
+                                    )
+                                  }
                                 } catch (error) {
                                   console.error(error)
                                 } finally {
