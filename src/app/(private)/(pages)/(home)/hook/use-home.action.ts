@@ -1,3 +1,5 @@
+'use client'
+
 import { useModal } from "@/src/shared/contexts/modal-context"
 import { UsedModal } from "../_components/used.modal"
 
@@ -10,23 +12,30 @@ export function useHomeAction() {
 
   const trackBl = async (code: string) => {
     const trimmed = code.trim()
-    if (!trimmed) return
+    if (!trimmed) return { numberContainer: undefined as number | undefined }
 
-    const response = await fetch('/api/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        code: trimmed,
-        carrier: 'msc',
-      }),
-    })
+    try {
+      const response = await fetch('/api/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: trimmed,
+          carrier: 'msc',
+        }),
+      })
 
-    const json = await response.json().catch(() => null)
-    if (!response.ok) {
-      return { error: `Status ${response.status}` }
+      const json = await response.json().catch(() => null)
+      console.log(json)
+      if (!response.ok) {
+        return { numberContainer: 0 }
+      }
+
+      console.log(json.data)
+
+      return { numberContainer: json.data.numberOfContainers }
+    } catch {
+      return { numberContainer: undefined as number | undefined }
     }
-
-    return { success: true, numberContainer: json.data.numberContainer }
 
   }
 

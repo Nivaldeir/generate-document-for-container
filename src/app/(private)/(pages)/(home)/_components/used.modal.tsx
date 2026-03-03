@@ -34,8 +34,12 @@ export function UsedModal({ onClose, data }: ModalProps<UsedModalData>) {
         <Input
           type="number"
           min={0}
-          disabled={true}
           value={numberContainer?.toString() ?? ''}
+          onChange={(event) => {
+            const parsed = Number(event.target.value)
+            if (Number.isNaN(parsed)) return
+            setNumberContainer(parsed)
+          }}
         />
       </div>
 
