@@ -229,6 +229,7 @@ export default function HomePage() {
                                 try {
                                   setIsLoading(true)
                                   const response = await trackBl(value)
+                                  console.log(response)
                                   const initialCount = response?.numberContainer ?? 0
                                   if (response?.existed) {
                                     handleOpenUsedModal(

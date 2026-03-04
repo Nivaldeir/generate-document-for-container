@@ -25,10 +25,10 @@ export function useHomeAction() {
       })
 
       const json = await response.json().catch(() => null)
-      if (!response.ok) {
+      if (!response.ok || json?.data?.status == "NOT_FOUND") {
         return { numberContainer: 0, existed: false }
       }
-
+      console.log(json)
       return { numberContainer: json.data.numberOfContainers, existed: true }
     } catch {
       return { numberContainer: undefined as number | undefined, existed: false }
