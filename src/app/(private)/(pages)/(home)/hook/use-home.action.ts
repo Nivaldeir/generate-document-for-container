@@ -6,8 +6,8 @@ import { UsedModal } from "../_components/used.modal"
 export function useHomeAction() {
   const { openModal } = useModal()
 
-  const handleOpenUsedModal = (blNumber: string, numberContainer: number, setNumberContainer: (number: number) => void) => {
-    openModal('used-modal', UsedModal, { blNumber, numberContainer, setNumberContainer: (number: number) => setNumberContainer(number) })
+  const handleOpenUsedModal = (blNumber: string, numberContainer: number, setNumberContainer: (number: number) => void, name: string) => {
+    openModal('used-modal', UsedModal, { blNumber, numberContainer, setNumberContainer: (number: number) => setNumberContainer(number), name })
   }
 
   const trackBl = async (code: string) => {
@@ -28,8 +28,8 @@ export function useHomeAction() {
       if (!response.ok || json?.data?.status == "NOT_FOUND") {
         return { numberContainer: 0, existed: false }
       }
-      console.log(json)
-      return { numberContainer: json.data.numberOfContainers, existed: true }
+
+      return { numberContainer: json.data.numberOfContainers, existed: true, destination: json.data.destination }
     } catch {
       return { numberContainer: undefined as number | undefined, existed: false }
     }

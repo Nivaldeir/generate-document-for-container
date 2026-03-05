@@ -235,13 +235,11 @@ export default function HomePage() {
                                     handleOpenUsedModal(
                                       value,
                                       initialCount,
-                                      (number) =>
-                                        form.setValue('containerCount', number, {
-                                          shouldValidate: true,
-                                          shouldDirty: true,
-                                          shouldTouch: true,
-                                        }),
+                                      (number) => form.setValue('containerCount', number, { shouldValidate: true, shouldDirty: true, shouldTouch: true }),
+                                      response?.destination ?? "",
                                     )
+                                  } else {
+                                    form.setValue('containerCount', 1, { shouldValidate: true, shouldDirty: true, shouldTouch: true })
                                   }
                                 } catch (error) {
                                   console.error(error)
@@ -263,26 +261,31 @@ export default function HomePage() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="containerCount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Qtd. Containers</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={1}
-                          disabled={isLoading}
-                          {...field}
-                          value={field.value ?? ''}
-                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {
+                  !form.watch('containerCount') && (
+                    <FormField
+                      control={form.control}
+                      name="containerCount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Qtd. Containers</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min={1}
+                              disabled={isLoading}
+                              {...field}
+                              value={field.value ?? ''}
+                              onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )
+                }
+
                 <FormField
                   control={form.control}
                   name="vessel"

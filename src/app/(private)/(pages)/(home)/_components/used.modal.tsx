@@ -8,11 +8,12 @@ interface UsedModalData {
   blNumber: string
   numberContainer?: number
   setNumberContainer: (value: number) => void
+  name: string
 }
 
 export function UsedModal({ onClose, data }: ModalProps<UsedModalData>) {
   if (!data) return null
-  const { blNumber, numberContainer, setNumberContainer } = data
+  const { blNumber, numberContainer, setNumberContainer, name } = data
 
   return (
     <div className="flex flex-col gap-6 p-6 w-full max-w-md">
@@ -22,7 +23,10 @@ export function UsedModal({ onClose, data }: ModalProps<UsedModalData>) {
           BL já utilizado
         </PageTitle>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          O BL <span className="font-medium">{data.blNumber}</span> já foi encontrado no sistema de rastreamento.
+          O BL <span className="font-medium">{blNumber}</span> já foi encontrado no sistema de rastreamento.
+        </p>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          <span className="font-medium">Destino:</span> {name}
         </p>
       </div>
 
