@@ -3,8 +3,8 @@ import { Poppins } from 'next/font/google'
 
 import { AuthProvider } from '@/src/shared/components/auth-provider'
 import { TRPCProvider } from '@/src/shared/components/trpc-provider'
-import './globals.css'
-import { ModalProvider } from '../shared/contexts/modal-context'
+import '../globals.css'
+import { ModalProvider } from '../../shared/contexts/modal-context'
 
 const _poppins = Poppins({ subsets: ['latin'], weight: ['400', '500', '600', '700'] })
 
