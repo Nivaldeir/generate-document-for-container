@@ -17,6 +17,7 @@ export function useHomeHook() {
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [uploadingSignature, setUploadingSignature] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [processing, setProcessing] = useState(false)
   const [success, setSuccess] = useState(false)
   const [trackingOpen, setTrackingOpen] = useState(false)
   const [trackingLoading, setTrackingLoading] = useState(false)
@@ -85,72 +86,51 @@ export function useHomeHook() {
   }
 
   const onSubmit = async (data: FormDocValues) => {
+    if (loading) return
     setLoading(true)
     setSuccess(false)
-    const batchId =
-      typeof crypto !== 'undefined' && 'randomUUID' in crypto
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(36).slice(2)}`
-
     try {
-      await generateAndSavePDF('bl', `BL-${data.blNumber}.pdf`, data, batchId, 'bl')
-      await new Promise(resolve => setTimeout(resolve, 300))
-      await generateAndSavePDF('payment', `Pagamento-Frete-${data.invoiceNumber}.pdf`, data, batchId, 'payment')
-      await new Promise(resolve => setTimeout(resolve, 300))
-      await generateAndSavePDF('invoice', `Invoice-${data.invoiceNumber}.pdf`, data, batchId, 'invoice')
-      setSuccess(true)
-    } catch (error) {
-      console.error('[v0] Erro ao processar requisição:', error)
-      alert('Erro ao processar requisição')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const generateAndSavePDF = async (type: string, filename: string, data: FormDocValues, batchId: string, kind: 'bl' | 'payment' | 'invoice') => {
-    const response = await fetch('/api/download-pdf', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type, data })
-    })
-
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(`Falha ao gerar ${filename}: ${error.details || error.error}`)
-    }
-
-    const { html } = await response.json()
-    const { default: jsPDF } = await import('jspdf')
-    const html2canvas = (await import('html2canvas')).default
-
-    const tempDiv = document.createElement('div')
-    tempDiv.innerHTML = html
-    tempDiv.style.position = 'absolute'
-    tempDiv.style.left = '-9999px'
-    tempDiv.style.width = '210mm'
-    document.body.appendChild(tempDiv)
-
-    try {
-      const canvas = await html2canvas(tempDiv, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
+      const enqueueRes = await fetch('/api/generate-pdfs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
       })
-      const imgData = canvas.toDataURL('image/png')
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-      const imgWidth = 210
-      const imgHeight = (canvas.height * imgWidth) / canvas.width
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight)
-
-      const blob = pdf.output('blob')
-      const formData = new FormData()
-      formData.append('file', blob, filename)
-      formData.append('originalName', filename)
-      formData.append('batchId', batchId)
-      formData.append('kind', kind)
-      await fetch('/api/documentos', { method: 'POST', body: formData })
-    } finally {
-      document.body.removeChild(tempDiv)
+      if (!enqueueRes.ok) {
+        const err = await enqueueRes.json()
+        throw new Error(err.message ?? err.error ?? 'Falha ao enfileirar')
+      }
+      const { jobId } = await enqueueRes.json()
+      setLoading(false)
+      setProcessing(true)
+      fetch('/api/worker/process-pdf', { method: 'POST' }).catch(() => {})
+      const deadline = Date.now() + 120000
+      const poll = async (): Promise<void> => {
+        if (Date.now() > deadline) {
+          setProcessing(false)
+          return
+        }
+        const statusRes = await fetch(`/api/generate-pdfs/${jobId}`)
+        if (!statusRes.ok) return
+        const statusData = await statusRes.json()
+        if (statusData.status === 'COMPLETED') {
+          setSuccess(true)
+          setProcessing(false)
+          return
+        }
+        if (statusData.status === 'FAILED') {
+          setProcessing(false)
+          alert(statusData.error ?? 'Geração falhou')
+          return
+        }
+        await fetch('/api/worker/process-pdf', { method: 'POST' }).catch(() => {})
+        await new Promise((r) => setTimeout(r, 1500))
+        return poll()
+      }
+      poll()
+    } catch (error) {
+      console.error('[home] Erro ao processar requisição:', error)
+      alert(error instanceof Error ? error.message : 'Erro ao processar requisição')
+      setLoading(false)
     }
   }
 
@@ -162,6 +142,7 @@ export function useHomeHook() {
     logoPreview,
     signaturePreview,
     loading,
+    processing,
     success,
     onSubmit,
     trackingOpen,

@@ -5,6 +5,13 @@ import { MinioS3 } from '@/src/shared/lib/minio'
 const MIME_PDF = 'application/pdf'
 
 export async function POST(request: Request) {
+  const contentType = request.headers.get('content-type') ?? ''
+  if (!contentType.includes('multipart/form-data')) {
+    return NextResponse.json(
+      { error: 'Content-Type deve ser multipart/form-data' },
+      { status: 400 }
+    )
+  }
   try {
     const formData = await request.formData()
     const file = formData.get('file') as File | null
@@ -46,6 +53,18 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error('[api/documentos] POST', error)
+    const isFormDataParseError =
+      error instanceof TypeError &&
+      (error.message.includes('Failed to parse body as FormData') ||
+        error.message.includes('parse body'))
+    if (isFormDataParseError) {
+      return NextResponse.json(
+        {
+          error: 'Corpo da requisição inválido ou muito grande. Tente um PDF menor ou aumente o limite no servidor.',
+        },
+        { status: 413 }
+      )
+    }
     return NextResponse.json(
       { error: 'Erro ao salvar documento' },
       { status: 500 }

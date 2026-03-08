@@ -29,3 +29,14 @@ model UploadedFile {
   user           User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt      DateTime @default(now())
 }
+
+model PdfGenerationJob {
+  id         String    @id @default(cuid())
+  status     String    @default("PENDING")
+  batchId    String?
+  formData   String
+  result     String?
+  error      String?
+  createdAt  DateTime  @default(now())
+  completedAt DateTime?
+}

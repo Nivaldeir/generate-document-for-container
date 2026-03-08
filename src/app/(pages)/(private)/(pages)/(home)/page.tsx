@@ -1,7 +1,7 @@
 'use client'
 
 import type { SubmitHandler } from 'react-hook-form'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@/src/shared/components/ui/button'
 import { Input } from '@/src/shared/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/shared/components/ui/card'
@@ -26,7 +26,7 @@ import {
 import { FileText, Loader2 } from 'lucide-react'
 import type { FormDocValues } from './utils/home.utils'
 import { useHomeHook } from './hook/use-home.hook'
-import { useHomeAction } from './hook/use-home.action'
+import { BlNumbersField } from './_components/bl-numbers-field'
 
 export default function HomePage() {
   const {
@@ -38,6 +38,7 @@ export default function HomePage() {
     signaturePreview,
     onSubmit,
     loading,
+    processing,
     success,
     trackingOpen,
     setTrackingOpen,
@@ -46,7 +47,6 @@ export default function HomePage() {
     trackingError,
   } = useHomeHook()
 
-  const { trackBl, handleOpenUsedModal } = useHomeAction()
   const [isLoading, setIsLoading] = useState(false)
 
   return (
@@ -209,82 +209,7 @@ export default function HomePage() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="blNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>B/L Number</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            {...field}
-                            disabled={isLoading}
-                            className="pr-10"
-                            onBlur={async (e) => {
-                              field.onBlur()
-                              const value = form.getValues('blNumber')?.trim()
-
-                              if (value) {
-                                try {
-                                  setIsLoading(true)
-                                  const response = await trackBl(value)
-                                  console.log(response)
-                                  const initialCount = response?.numberContainer ?? 0
-                                  if (response?.existed) {
-                                    handleOpenUsedModal(
-                                      value,
-                                      initialCount,
-                                      (number) => form.setValue('containerCount', number, { shouldValidate: true, shouldDirty: true, shouldTouch: true }),
-                                      response?.destination ?? "",
-                                    )
-                                  } else {
-                                    form.setValue('containerCount', 1, { shouldValidate: true, shouldDirty: true, shouldTouch: true })
-                                  }
-                                } catch (error) {
-                                  console.error(error)
-                                } finally {
-                                  setIsLoading(false)
-                                }
-                              }
-                            }}
-                          />
-
-                          {isLoading && (
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                              <Loader2 className="h-5 w-5 animate-spin" />
-                            </div>
-                          )}
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {
-                  !form.watch('containerCount') && (
-                    <FormField
-                      control={form.control}
-                      name="containerCount"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Qtd. Containers</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min={1}
-                              disabled={isLoading}
-                              {...field}
-                              value={field.value ?? ''}
-                              onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )
-                }
+                <BlNumbersField />
 
                 <FormField
                   control={form.control}
@@ -545,7 +470,7 @@ export default function HomePage() {
                   name="beneficiaryBank"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Banco Beneficiário</FormLabel>
+                      <FormLabel>Banco Beneficiário (opcional)</FormLabel>
                       <FormControl>
                         <Input disabled={isLoading} {...field} />
                       </FormControl>
@@ -558,7 +483,33 @@ export default function HomePage() {
                   name="swiftCode"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>SWIFT Code</FormLabel>
+                      <FormLabel>SWIFT Code (opcional)</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="swiftBic"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>SWIFT/BIC (opcional)</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="intermediaryBank"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Intermediary Bank (opcional)</FormLabel>
                       <FormControl>
                         <Input disabled={isLoading} {...field} />
                       </FormControl>
@@ -597,7 +548,7 @@ export default function HomePage() {
                   name="beneficiaryAddress"
                   render={({ field }) => (
                     <FormItem className="sm:col-span-2">
-                      <FormLabel>Endereço do Banco</FormLabel>
+                      <FormLabel>Bank Add / Endereço do Banco (opcional)</FormLabel>
                       <FormControl>
                         <Input disabled={isLoading} {...field} />
                       </FormControl>
@@ -683,7 +634,7 @@ export default function HomePage() {
         <Dialog open={trackingOpen} onOpenChange={setTrackingOpen}>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
-              <DialogTitle>Rastreamento do B/L {form.watch('blNumber') || ''}</DialogTitle>
+              <DialogTitle>Rastreamento do B/L {form.watch('blNumbers')?.[0] ?? ''}</DialogTitle>
               <DialogDescription>Resposta da API de rastreio (JSON bruto).</DialogDescription>
             </DialogHeader>
             <div className="mt-2">
@@ -710,7 +661,7 @@ export default function HomePage() {
             <CardHeader>
               <CardTitle className="text-green-900">Documentos gerados com sucesso</CardTitle>
               <CardDescription className="text-green-700">
-                Os 3 documentos (BL, Pagamento de Frete e Invoice) foram gerados e salvos. Acesse &quot;Listar Documentos&quot; no menu para visualizar ou baixar.
+                Os 3 documentos (BL com lista de B/Ls, Pagamento de Frete e Invoice) foram gerados e salvos. Acesse &quot;Listar Documentos&quot; no menu para visualizar ou baixar.
               </CardDescription>
             </CardHeader>
           </Card>

@@ -137,6 +137,9 @@
       <div class="invoice-info" style="margin-top: 10px;">
         <div><strong>Invoice Nº</strong> <%= invoiceNumber %></div>
         <div style="margin-top: 5px;"><strong>Date:</strong> <%= invoiceDate %></div>
+        <% if (typeof blNumber !== 'undefined' && blNumber) { %>
+        <div style="margin-top: 5px;"><strong>B/L(s):</strong> <%= blNumber %></div>
+        <% } %>
       </div>
     </div>
   </div>
@@ -155,10 +158,12 @@
       </tr>
     </thead>
     <tbody>
+      <% (blNumbers || []).forEach(function(bl) { %>
       <tr>
-        <td><%= blNumber %></td>
+        <td><%= bl %></td>
         <td style="text-align: right;"><%= currency %> <%= freightValue %></td>
       </tr>
+      <% }); %>
       <tr class="total-row">
         <td>TOTAL</td>
         <td style="text-align: right;"><%= currency %> <%= freightValue %></td>
@@ -170,15 +175,31 @@
     <div class="bank-title">The payment must be done in the beneficiary's account. Please check the bank and account information below:</div>
     
     <div style="margin-top: 15px;">
+      <% if (beneficiaryBank) { %>
       <div class="info-row">
         <span class="label">BENEFICIARY BANK:</span> <%= beneficiaryBank %>
       </div>
+      <% } %>
+      <% if (beneficiaryAddress) { %>
       <div class="info-row">
         <span class="label">BANK ADD:</span> <%= beneficiaryAddress %>
       </div>
+      <% } %>
+      <% if (swiftCode) { %>
       <div class="info-row">
         <span class="label">SWIFT CODE:</span> <%= swiftCode %>
       </div>
+      <% } %>
+      <% if (typeof swiftBic !== 'undefined' && swiftBic) { %>
+      <div class="info-row">
+        <span class="label">SWIFT/BIC:</span> <%= swiftBic %>
+      </div>
+      <% } %>
+      <% if (typeof intermediaryBank !== 'undefined' && intermediaryBank) { %>
+      <div class="info-row">
+        <span class="label">INTERMEDIARY BANK:</span> <%= intermediaryBank %>
+      </div>
+      <% } %>
       <div class="info-row">
         <span class="label">BENEFICIARY ACCOUNT:</span> <%= accountNumber %>
       </div>
@@ -186,7 +207,7 @@
         <span class="label">US Correspondent:</span> <%= correspondent %>
       </div>
       <div class="info-row">
-        <span class="label">Routing #:</span> <%= routingNumber %> / MEMO FIELD: <%= beneficiaryBank %> / <%= routingNumber %>
+        <span class="label">Routing #:</span> <%= routingNumber %><% if (beneficiaryBank) { %> / MEMO FIELD: <%= beneficiaryBank %> / <%= routingNumber %><% } %>
       </div>
     </div>
   </div>
