@@ -32,7 +32,9 @@ RUN apk add --no-cache \
     chromium \
     xdg-utils
 
-ENV CHROME_PATH=/usr/bin/chromium
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+ENV DATABASE_URL=file:./dev.db
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 COPY . .
 

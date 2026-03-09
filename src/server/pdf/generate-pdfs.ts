@@ -31,9 +31,18 @@ export async function generatePdfs(formData: PdfFormData): Promise<PdfGeneration
   const isServiceInvoice = formData.invoiceType === 'service'
   const invoiceHtml = ejs.render(isServiceInvoice ? invoiceServiceTemplate : invoiceFreightTemplate, data)
 
+  const executablePath =
+    process.env.PUPPETEER_EXECUTABLE_PATH ?? process.env.CHROME_PATH ?? undefined
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    executablePath,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--single-process',
+    ],
   })
 
   const pdfOptions = {
