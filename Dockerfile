@@ -1,9 +1,14 @@
 FROM node:22-alpine
+
 WORKDIR /app
+
+# Enable corepack (pnpm) and prepare pnpm
+RUN corepack enable
 
 COPY package.json package-lock.json ./
 
-RUN npm install
+# Import npm lockfile to pnpm and install deps
+RUN pnpm import && pnpm install --frozen-lockfile
 
 RUN apk add --no-cache openssl
 
@@ -31,10 +36,10 @@ ENV CHROME_PATH=/usr/bin/chromium
 
 COPY . .
 
-RUN npx prisma generate
-RUN npx prisma migrate deploy
-RUN npm run build
+RUN pnpm prisma generate
+RUN pnpm prisma migrate deploy
+RUN pnpm run build
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["pnpm", "start"]
