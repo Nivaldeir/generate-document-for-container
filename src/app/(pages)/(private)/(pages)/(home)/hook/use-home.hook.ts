@@ -18,6 +18,7 @@ export function useHomeHook() {
   const [uploadingSignature, setUploadingSignature] = useState(false)
   const [loading, setLoading] = useState(false)
   const [processing, setProcessing] = useState(false)
+  const [serviceLoading, setServiceLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [trackingOpen, setTrackingOpen] = useState(false)
   const [trackingLoading, setTrackingLoading] = useState(false)
@@ -134,6 +135,55 @@ export function useHomeHook() {
     }
   }
 
+  const onGenerateServiceInvoice = async (data: FormDocValues) => {
+    if (serviceLoading) return
+    setServiceLoading(true)
+    try {
+      const payload = { ...data, invoiceType: 'service' as const }
+      const response = await fetch('/api/download-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'invoice-service', data: payload }),
+      })
+      if (!response.ok) {
+        const error = await response.json().catch(() => null)
+        throw new Error(error?.details ?? error?.error ?? 'Falha ao gerar Invoice de Serviço')
+      }
+      const { html } = await response.json()
+      const { default: jsPDF } = await import('jspdf')
+      const html2canvas = (await import('html2canvas')).default
+
+      const tempDiv = document.createElement('div')
+      tempDiv.innerHTML = html
+      tempDiv.style.position = 'absolute'
+      tempDiv.style.left = '-9999px'
+      tempDiv.style.width = '210mm'
+      document.body.appendChild(tempDiv)
+
+      try {
+        const canvas = await html2canvas(tempDiv, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+        })
+        const imgData = canvas.toDataURL('image/png')
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+        const imgWidth = 210
+        const imgHeight = (canvas.height * imgWidth) / canvas.width
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight)
+        const filename = `Invoice-Servico-${payload.invoiceNumber}.pdf`
+        pdf.save(filename)
+      } finally {
+        document.body.removeChild(tempDiv)
+      }
+    } catch (error) {
+      console.error('[home] Erro ao gerar invoice de serviço:', error)
+      alert(error instanceof Error ? error.message : 'Erro ao gerar invoice de serviço')
+    } finally {
+      setServiceLoading(false)
+    }
+  }
+
   return {
     form,
     handleAssetChange,
@@ -143,8 +193,10 @@ export function useHomeHook() {
     signaturePreview,
     loading,
     processing,
+    serviceLoading,
     success,
     onSubmit,
+    onGenerateServiceInvoice,
     trackingOpen,
     setTrackingOpen,
     trackingLoading,

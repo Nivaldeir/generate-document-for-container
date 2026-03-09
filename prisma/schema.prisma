@@ -40,3 +40,12 @@ model PdfGenerationJob {
   createdAt  DateTime  @default(now())
   completedAt DateTime?
 }
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  cnpj      String
+  address   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

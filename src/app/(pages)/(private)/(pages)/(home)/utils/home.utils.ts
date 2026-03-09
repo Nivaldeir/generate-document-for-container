@@ -43,6 +43,7 @@ export const formDocSchema = z.object({
   issueDate: z.string().optional(),
   paymentDate: z.string(),
   invoiceDate: z.string(),
+  invoiceType: z.enum(['freight', 'service']),
   logoUrl: z.string().optional(),
   signatureUrl: z.string().optional(),
 })
@@ -92,4 +93,5 @@ export const DEFAULT_VALUES = {
   issueDate: '02/10/2025',
   paymentDate: '3 DE DEZEMBRO DE 2025',
   invoiceDate: 'DEZ 3 2025',
+  invoiceType: 'freight' as const,
 }

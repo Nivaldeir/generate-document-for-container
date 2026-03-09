@@ -22,12 +22,14 @@ function templateData(formData: PdfFormData): PdfFormData & { blNumber: string }
 export async function generatePdfs(formData: PdfFormData): Promise<PdfGenerationResult> {
   const blTemplate = fs.readFileSync(path.join(TEMPLATES_DIR, 'bl.ejs'), 'utf-8')
   const paymentTemplate = fs.readFileSync(path.join(TEMPLATES_DIR, 'payment.ejs'), 'utf-8')
-  const invoiceTemplate = fs.readFileSync(path.join(TEMPLATES_DIR, 'invoice.ejs'), 'utf-8')
+  const invoiceFreightTemplate = fs.readFileSync(path.join(TEMPLATES_DIR, 'invoice.ejs'), 'utf-8')
+  const invoiceServiceTemplate = fs.readFileSync(path.join(TEMPLATES_DIR, 'invoice-service.ejs'), 'utf-8')
 
   const data = templateData(formData)
   const blHtml = ejs.render(blTemplate, data)
   const paymentHtml = ejs.render(paymentTemplate, data)
-  const invoiceHtml = ejs.render(invoiceTemplate, data)
+  const isServiceInvoice = formData.invoiceType === 'service'
+  const invoiceHtml = ejs.render(isServiceInvoice ? invoiceServiceTemplate : invoiceFreightTemplate, data)
 
   const browser = await puppeteer.launch({
     headless: true,

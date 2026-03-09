@@ -16,15 +16,12 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/src/shared/components/ui/sidebar'
-import {
-  DoorOpen,
-  Home,
-  List,
-} from 'lucide-react'
+import { DoorOpen, Home, List, Users } from 'lucide-react'
 
 const navItems = [
   { title: 'Gerar Documentos', url: '/', icon: Home },
   { title: 'Listar Documentos', url: '/formulary/docs', icon: List },
+  { title: 'Clientes', url: '/clients', icon: Users },
 ]
 
 export function AppSidebar() {

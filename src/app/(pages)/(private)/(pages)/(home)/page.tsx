@@ -27,6 +27,7 @@ import { FileText, Loader2 } from 'lucide-react'
 import type { FormDocValues } from './utils/home.utils'
 import { useHomeHook } from './hook/use-home.hook'
 import { BlNumbersField } from './_components/bl-numbers-field'
+import { BrazilBiSelect } from './_components/brazil-bi-select'
 
 export default function HomePage() {
   const {
@@ -37,8 +38,10 @@ export default function HomePage() {
     logoPreview,
     signaturePreview,
     onSubmit,
+    onGenerateServiceInvoice,
     loading,
     processing,
+    serviceLoading,
     success,
     trackingOpen,
     setTrackingOpen,
@@ -148,6 +151,7 @@ export default function HomePage() {
                 <CardDescription>Dados do agente no Brasil</CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-2">
+                <BrazilBiSelect />
                 <FormField
                   control={form.control}
                   name="brazilBiName"
@@ -372,6 +376,27 @@ export default function HomePage() {
                 <CardDescription>Valores e condições de pagamento</CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-3">
+                <FormField
+                  control={form.control}
+                  name="invoiceType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo de Invoice</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="freight">Frete</SelectItem>
+                          <SelectItem value="service">Serviço</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="currency"
@@ -614,20 +639,55 @@ export default function HomePage() {
               </CardContent>
             </Card>
 
-            <div className="flex gap-4">
-              <Button type="submit" size="lg" className="flex-1" disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Gerando PDFs...
-                  </>
-                ) : (
-                  <>
-                    <FileText className="mr-2 h-5 w-5" />
-                    Gerar Documentos
-                  </>
-                )}
-              </Button>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-1">
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="flex-1"
+                  disabled={loading || processing || serviceLoading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Enfileirando...
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="mr-2 h-5 w-5" />
+                      Gerar Documentos de Frete
+                    </>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  className="flex-1"
+                  disabled={serviceLoading || loading || processing}
+                  onClick={form.handleSubmit(
+                    onGenerateServiceInvoice as SubmitHandler<FormDocValues>
+                  )}
+                >
+                  {serviceLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Gerando Invoice de Serviço...
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="mr-2 h-5 w-5" />
+                      Gerar Invoice de Serviço
+                    </>
+                  )}
+                </Button>
+              </div>
+              {processing && (
+                <p className="text-sm text-muted-foreground flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Gerando em segundo plano. Os documentos aparecerão em breve.
+                </p>
+              )}
             </div>
           </form>
         </Form>

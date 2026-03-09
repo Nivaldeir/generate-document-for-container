@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      line-height: 1.4;
+      margin: 0;
+      padding: 32px 0;
+      min-height: 100%;
+    }
+    .page-inner {
+      max-width: 170mm;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .company-header {
+      text-align: left;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #000;
+    }
+    .brand-logo {
+      max-height: 32px;
+      max-width: 72px;
+      object-fit: contain;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .company-name {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+    .company-line {
+      font-size: 10px;
+    }
+    .invoice-header {
+      display: grid;
+      grid-template-columns: 2fr 1.2fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    .invoice-title {
+      font-size: 22px;
+      font-weight: bold;
+      text-align: right;
+    }
+    .invoice-info {
+      text-align: right;
+      font-size: 11px;
+    }
+    .label {
+      font-weight: bold;
+    }
+    .section {
+      margin-bottom: 18px;
+      font-size: 11px;
+    }
+    .section-title {
+      font-weight: bold;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+    th {
+      background-color: #f0f0f0;
+      border: 1px solid #000;
+      padding: 8px;
+      text-align: left;
+      font-size: 11px;
+    }
+    td {
+      border: 1px solid #000;
+      padding: 8px;
+      font-size: 11px;
+    }
+    .total-row td {
+      font-weight: bold;
+    }
+    .bank-info {
+      margin-top: 18px;
+      padding: 10px;
+      border: 1px solid #000;
+      font-size: 10px;
+      background-color: #f9f9f9;
+    }
+    .footer-note {
+      margin-top: 18px;
+      font-size: 10px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-inner">
+    <div class="company-header">
+      <% if (typeof logoUrl !== 'undefined' && logoUrl) { %>
+        <img src="<%= logoUrl %>" alt="Logo" class="brand-logo" />
+      <% } %>
+      <div class="company-name"><%= brazilBiName %></div>
+      <div class="company-line"><%= brazilBiAddress %></div>
+      <div class="company-line">CNPJ: <%= brazilBiCnpj %></div>
+    </div>
+
+    <div class="invoice-header">
+      <div class="section">
+        <div class="section-title">Bill to</div>
+        <div style="font-weight: bold;"><%= consigneeName %></div>
+        <div><%= consigneeAddress %></div>
+      </div>
+      <div>
+        <div class="invoice-title">INVOICE</div>
+        <div class="invoice-info" style="margin-top: 8px;">
+          <div><span class="label">Number:</span> <%= invoiceNumber %></div>
+          <div style="margin-top: 4px;"><span class="label">Date:</span> <%= invoiceDate %></div>
+          <div style="margin-top: 4px;"><span class="label">Currency:</span> <%= currency %></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Service details</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 60%;">Description</th>
+            <th style="width: 10%;">Qty</th>
+            <th style="width: 15%;">Unit price</th>
+            <th style="width: 15%;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><%= description %></td>
+            <td>1.00</td>
+            <td><%= freightValue %></td>
+            <td><%= freightValue %></td>
+          </tr>
+          <tr class="total-row">
+            <td colspan="3" style="text-align: right;">Total</td>
+            <td><%= currency %> <%= freightValue %></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="bank-info">
+      <div style="font-weight: bold; text-align: center; margin-bottom: 6px;">Bank details</div>
+      <% if (beneficiaryBank) { %>
+        <div><span class="label">Beneficiary bank:</span> <%= beneficiaryBank %></div>
+      <% } %>
+      <% if (beneficiaryAddress) { %>
+        <div><span class="label">Bank address:</span> <%= beneficiaryAddress %></div>
+      <% } %>
+      <% if (swiftCode) { %>
+        <div><span class="label">SWIFT code:</span> <%= swiftCode %></div>
+      <% } %>
+      <% if (typeof swiftBic !== 'undefined' && swiftBic) { %>
+        <div><span class="label">SWIFT/BIC:</span> <%= swiftBic %></div>
+      <% } %>
+      <% if (typeof intermediaryBank !== 'undefined' && intermediaryBank) { %>
+        <div><span class="label">Intermediary bank:</span> <%= intermediaryBank %></div>
+      <% } %>
+      <div><span class="label">Account:</span> <%= accountNumber %></div>
+      <div><span class="label">Routing:</span> <%= routingNumber %></div>
+      <div><span class="label">Correspondent:</span> <%= correspondent %></div>
+    </div>
+
+    <div class="footer-note">
+      This invoice refers to service fees only. No freight, B/L or container data is applicable.
+    </div>
+  </div>
+</body>
+</html>
+

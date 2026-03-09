@@ -20,6 +20,9 @@ export async function POST(request: Request) {
       case 'invoice':
         templatePath = join(templatesDir, 'invoice.ejs')
         break
+      case 'invoice-service':
+        templatePath = join(templatesDir, 'invoice-service.ejs')
+        break
       default:
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 })
     }
