@@ -165,6 +165,12 @@
       <% if (beneficiaryAddress) { %>
         <div><span class="label">Bank address:</span> <%= beneficiaryAddress %></div>
       <% } %>
+      <% if (typeof bankCode !== 'undefined' && bankCode) { %>
+        <div><span class="label">Bank code:</span> <%= bankCode %></div>
+      <% } %>
+      <% if (typeof branchCode !== 'undefined' && branchCode) { %>
+        <div><span class="label">Branch code:</span> <%= branchCode %></div>
+      <% } %>
       <% if (swiftCode) { %>
         <div><span class="label">SWIFT code:</span> <%= swiftCode %></div>
       <% } %>

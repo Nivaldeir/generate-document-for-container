@@ -505,6 +505,19 @@ export default function HomePage() {
                 />
                 <FormField
                   control={form.control}
+                  name="bankCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bank Code (opcional)</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="swiftCode"
                   render={({ field }) => (
                     <FormItem>
@@ -561,6 +574,19 @@ export default function HomePage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Routing Number</FormLabel>
+                      <FormControl>
+                        <Input disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="branchCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Branch Code (opcional)</FormLabel>
                       <FormControl>
                         <Input disabled={isLoading} {...field} />
                       </FormControl>
