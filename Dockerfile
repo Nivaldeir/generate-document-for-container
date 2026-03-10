@@ -5,10 +5,9 @@ WORKDIR /app
 # Enable corepack (pnpm) and prepare pnpm
 RUN corepack enable
 
-COPY package.json package-lock.json ./
+COPY package.json pnpm-lock.yaml ./
 
-# Import npm lockfile to pnpm and install deps
-RUN pnpm import && pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 RUN apk add --no-cache openssl
 
@@ -38,8 +37,10 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 COPY . .
 
 RUN pnpm prisma generate
+
 RUN pnpm run build
 
 EXPOSE 3000
 
+# DATABASE_URL must be set at runtime (docker run -e DATABASE_URL=... or --env-file)
 CMD ["sh", "-c", "pnpm prisma db push && pnpm start"]
