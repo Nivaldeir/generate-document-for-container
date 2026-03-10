@@ -18,6 +18,15 @@ export function ConsigneeClientSelect() {
       const opts = { shouldDirty: true, shouldTouch: true } as const
       form.setValue('consigneeName', client.name, opts)
       form.setValue('consigneeAddress', client.address, opts)
+      form.setValue('beneficiaryBank', client.beneficiaryBank ?? '', opts)
+      form.setValue('bankCode', client.bankCode ?? '', opts)
+      form.setValue('branchCode', client.branchCode ?? '', opts)
+      form.setValue('swiftCode', client.swiftCode ?? '', opts)
+      form.setValue('swiftBic', client.swiftBic ?? '', opts)
+      form.setValue('intermediaryBank', client.intermediaryBank ?? '', opts)
+      form.setValue('accountNumber', client.accountNumber ?? '', opts)
+      form.setValue('routingNumber', client.routingNumber ?? '', opts)
+      form.setValue('beneficiaryAddress', client.beneficiaryAddress ?? '', opts)
     },
     [clients, form]
   )
