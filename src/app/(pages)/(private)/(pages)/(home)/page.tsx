@@ -31,11 +31,6 @@ import { BrazilBiSelect } from './_components/brazil-bi-select'
 export default function HomePage() {
   const {
     form,
-    handleAssetChange,
-    uploadingLogo,
-    uploadingSignature,
-    logoPreview,
-    signaturePreview,
     onSubmit,
     onGenerateServiceInvoice,
     loading,
@@ -44,9 +39,6 @@ export default function HomePage() {
     success,
     trackingOpen,
     setTrackingOpen,
-    trackingLoading,
-    trackingResult,
-    trackingError,
   } = useHomeHook()
 
   const isFormDisabled = loading || processing || serviceLoading
@@ -633,15 +625,9 @@ export default function HomePage() {
               <DialogDescription>Resposta da API de rastreio (JSON bruto).</DialogDescription>
             </DialogHeader>
             <div className="mt-2">
-              {trackingLoading ? (
-                <p className="text-sm text-muted-foreground">Consultando rastreio...</p>
-              ) : (
-                <pre className="max-h-[320px] overflow-auto rounded bg-slate-950/90 p-3 text-xs text-slate-50">
-                  {trackingError
-                    ? `Erro: ${trackingError}`
-                    : JSON.stringify(trackingResult, null, 2)}
-                </pre>
-              )}
+              <pre className="max-h-[320px] overflow-auto rounded bg-slate-950/90 p-3 text-xs text-slate-50">
+                {JSON.stringify(success, null, 2)}
+              </pre>
             </div>
             <DialogFooter>
               <Button type="button" onClick={() => setTrackingOpen(false)}>

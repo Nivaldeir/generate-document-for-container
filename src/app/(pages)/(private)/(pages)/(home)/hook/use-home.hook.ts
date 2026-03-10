@@ -2,8 +2,9 @@ import { useSyncExternalStore, useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { DEFAULT_VALUES, formDocSchema, FormDocValues } from "../utils/home.utils"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { toast } from "sonner"
 
-const emptySubscribe = () => () => {}
+const emptySubscribe = () => () => { }
 function getStoredLogo(): string | null {
   if (typeof window === 'undefined') return null
   return window.localStorage.getItem('form-logo')
@@ -21,9 +22,6 @@ export function useHomeHook() {
   const [serviceLoading, setServiceLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [trackingOpen, setTrackingOpen] = useState(false)
-  const [trackingLoading, setTrackingLoading] = useState(false)
-  const [trackingResult, setTrackingResult] = useState<unknown | null>(null)
-  const [trackingError, setTrackingError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
@@ -91,43 +89,21 @@ export function useHomeHook() {
     setLoading(true)
     setSuccess(false)
     try {
-      const enqueueRes = await fetch('/api/generate-pdfs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+      toast.promise(async () => {
+        const enqueueRes = await fetch('/api/generate-pdfs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+        if (!enqueueRes.ok) {
+          const err = await enqueueRes.json()
+          throw new Error(err.message ?? err.error ?? 'Falha ao enfileirar')
+        }
+      }, {
+        loading: 'Gerando PDFs...',
+        success: 'PDFs gerados com sucesso!',
+        error: 'Erro ao gerar PDFs',
       })
-      if (!enqueueRes.ok) {
-        const err = await enqueueRes.json()
-        throw new Error(err.message ?? err.error ?? 'Falha ao enfileirar')
-      }
-      const { jobId } = await enqueueRes.json()
-      setLoading(false)
-      setProcessing(true)
-      fetch('/api/worker/process-pdf', { method: 'POST' }).catch(() => {})
-      const deadline = Date.now() + 120000
-      const poll = async (): Promise<void> => {
-        if (Date.now() > deadline) {
-          setProcessing(false)
-          return
-        }
-        const statusRes = await fetch(`/api/generate-pdfs/${jobId}`)
-        if (!statusRes.ok) return
-        const statusData = await statusRes.json()
-        if (statusData.status === 'COMPLETED') {
-          setSuccess(true)
-          setProcessing(false)
-          return
-        }
-        if (statusData.status === 'FAILED') {
-          setProcessing(false)
-          alert(statusData.error ?? 'Geração falhou')
-          return
-        }
-        await fetch('/api/worker/process-pdf', { method: 'POST' }).catch(() => {})
-        await new Promise((r) => setTimeout(r, 1500))
-        return poll()
-      }
-      poll()
     } catch (error) {
       console.error('[home] Erro ao processar requisição:', error)
       alert(error instanceof Error ? error.message : 'Erro ao processar requisição')
@@ -199,8 +175,5 @@ export function useHomeHook() {
     onGenerateServiceInvoice,
     trackingOpen,
     setTrackingOpen,
-    trackingLoading,
-    trackingResult,
-    trackingError,
   }
 }
