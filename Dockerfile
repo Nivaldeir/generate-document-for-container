@@ -43,4 +43,4 @@ RUN pnpm run build
 EXPOSE 3000
 
 # DATABASE_URL must be set at runtime (docker run -e DATABASE_URL=... or --env-file)
-CMD ["sh", "-c", "pnpm prisma db push && pnpm start"]
+CMD ["pnpm", "start"]
