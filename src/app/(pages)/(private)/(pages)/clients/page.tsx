@@ -1,9 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { trpc } from '@/src/shared/lib/trpc'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/src/shared/components/ui/card'
-import { Input } from '@/src/shared/components/ui/input'
 import { Button } from '@/src/shared/components/ui/button'
 import {
   Table,
@@ -13,29 +12,126 @@ import {
   TableHeader,
   TableRow,
 } from '@/src/shared/components/ui/table'
-import { Loader2, Users } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/src/shared/components/ui/dialog'
+import { Form } from '@/src/shared/components/ui/form'
+import { Loader2, Users, Plus, Pencil } from 'lucide-react'
+import { useClients, clientFormDefaultValues } from './hooks/use-clients.hook'
+import type { ClientFormValues } from './hooks/use-clients.hook'
+import { ClientFormFields } from './_components/client-form-fields'
+
+type ClientRow = {
+  id: string
+  name: string
+  cnpj: string
+  address: string
+  logoUrl?: string | null
+  signatureUrl?: string | null
+  beneficiaryBank?: string | null
+  bankCode?: string | null
+  branchCode?: string | null
+  swiftCode?: string | null
+  swiftBic?: string | null
+  intermediaryBank?: string | null
+  accountNumber?: string | null
+  routingNumber?: string | null
+  beneficiaryAddress?: string | null
+}
+
+function clientToFormValues(c: ClientRow): ClientFormValues {
+  return {
+    name: c.name,
+    cnpj: c.cnpj,
+    address: c.address,
+    logoUrl: c.logoUrl ?? '',
+    signatureUrl: c.signatureUrl ?? '',
+    beneficiaryBank: c.beneficiaryBank ?? '',
+    bankCode: c.bankCode ?? '',
+    branchCode: c.branchCode ?? '',
+    swiftCode: c.swiftCode ?? '',
+    swiftBic: c.swiftBic ?? '',
+    intermediaryBank: c.intermediaryBank ?? '',
+    accountNumber: c.accountNumber ?? '',
+    routingNumber: c.routingNumber ?? '',
+    beneficiaryAddress: c.beneficiaryAddress ?? '',
+  }
+}
 
 export default function ClientsPage() {
-  const [name, setName] = useState('')
-  const [cnpj, setCnpj] = useState('')
-  const [address, setAddress] = useState('')
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editingClient, setEditingClient] = useState<ClientRow | null>(null)
+
+  const {
+    form,
+    uploadingLogo,
+    uploadingSignature,
+    handleLogoChange,
+    handleSignatureChange,
+  } = useClients()
 
   const utils = trpc.useUtils()
   const { data: clients = [], isLoading } = trpc.clients.list.useQuery()
-  const { mutateAsync: createClient, isPending } = trpc.clients.create.useMutation({
+  const { mutateAsync: createClient, isPending: isCreating } = trpc.clients.create.useMutation({
+    onSuccess: () => {
+      void utils.clients.list.invalidate()
+    },
+  })
+  const { mutateAsync: updateClient, isPending: isUpdating } = trpc.clients.update.useMutation({
     onSuccess: () => {
       void utils.clients.list.invalidate()
     },
   })
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault()
-    if (!name.trim() || !cnpj.trim() || !address.trim()) return
-    await createClient({ name: name.trim(), cnpj: cnpj.trim(), address: address.trim() })
-    setName('')
-    setCnpj('')
-    setAddress('')
-  }
+  const isPending = isCreating || isUpdating
+
+  const openCreate = useCallback(() => {
+    setEditingClient(null)
+    form.reset(clientFormDefaultValues)
+    setModalOpen(true)
+  }, [form])
+
+  const openEdit = useCallback(
+    (client: ClientRow) => {
+      setEditingClient(client)
+      form.reset(clientToFormValues(client))
+      setModalOpen(true)
+    },
+    [form]
+  )
+
+  const handleSubmit = form.handleSubmit(async (values) => {
+    if (!values.name.trim() || !values.cnpj.trim() || !values.address.trim()) return
+    const payload = {
+      name: values.name.trim(),
+      cnpj: values.cnpj.trim(),
+      address: values.address.trim(),
+      logoUrl: values.logoUrl || undefined,
+      signatureUrl: values.signatureUrl || undefined,
+      beneficiaryBank: values.beneficiaryBank || undefined,
+      bankCode: values.bankCode || undefined,
+      branchCode: values.branchCode || undefined,
+      swiftCode: values.swiftCode || undefined,
+      swiftBic: values.swiftBic || undefined,
+      intermediaryBank: values.intermediaryBank || undefined,
+      accountNumber: values.accountNumber || undefined,
+      routingNumber: values.routingNumber || undefined,
+      beneficiaryAddress: values.beneficiaryAddress || undefined,
+    }
+    if (editingClient) {
+      await updateClient({ id: editingClient.id, ...payload })
+    } else {
+      await createClient(payload)
+    }
+    setModalOpen(false)
+    setEditingClient(null)
+    form.reset(clientFormDefaultValues)
+  })
 
   return (
     <Card className="overflow-hidden">
@@ -48,60 +144,25 @@ export default function ClientsPage() {
             </CardTitle>
             <CardDescription>Cadastre e consulte clientes para usar nos documentos.</CardDescription>
           </div>
+          <Button onClick={openCreate}>
+            <Plus className="mr-2 h-4 w-4" />
+            Criar novo
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-6 pt-6">
-        <form onSubmit={handleSubmit} className="grid gap-3 sm:grid-cols-[2fr_1.5fr]">
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-medium text-slate-600">Nome</label>
-              <Input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Nome do cliente"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600">CNPJ</label>
-              <Input
-                value={cnpj}
-                onChange={(e) => setCnpj(e.target.value)}
-                placeholder="00.000.000/0000-00"
-              />
-            </div>
-          </div>
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-medium text-slate-600">Endereço</label>
-              <Input
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Endereço completo"
-              />
-            </div>
-            <div className="flex justify-end pt-1">
-              <Button type="submit" disabled={isPending}>
-                {isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Salvando...
-                  </>
-                ) : (
-                  'Salvar cliente'
-                )}
-              </Button>
-            </div>
-          </div>
-        </form>
-
         <div className="border rounded-md overflow-hidden">
           {isLoading ? (
-            <div className="flex items-center justify-center py-10">
+            <div className="justify-center flex py-10">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : clients.length === 0 ? (
-            <div className="py-10 text-center text-sm text-muted-foreground">
-              Nenhum cliente cadastrado ainda.
+            <div className="py-10 text-center text-sm text-muted-foreground space-y-4">
+              <p>Nenhum cliente cadastrado ainda.</p>
+              <Button variant="outline" onClick={openCreate}>
+                <Plus className="mr-2 h-4 w-4" />
+                Criar novo cliente
+              </Button>
             </div>
           ) : (
             <Table>
@@ -110,14 +171,31 @@ export default function ClientsPage() {
                   <TableHead>Nome</TableHead>
                   <TableHead>CNPJ</TableHead>
                   <TableHead>Endereço</TableHead>
+                  <TableHead className="w-[100px] text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {clients.map((client: { id: string; name: string; cnpj: string; address: string }) => (
-                  <TableRow key={client.id}>
+                {(clients as ClientRow[]).map((client) => (
+                  <TableRow
+                    key={client.id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => openEdit(client)}
+                  >
                     <TableCell className="font-medium">{client.name}</TableCell>
                     <TableCell>{client.cnpj}</TableCell>
                     <TableCell>{client.address}</TableCell>
+                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEdit(client)}
+                        className="gap-1.5"
+                      >
+                        <Pencil className="h-4 w-4" />
+                        Editar
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -125,7 +203,48 @@ export default function ClientsPage() {
           )}
         </div>
       </CardContent>
+
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingClient ? 'Editar cliente' : 'Novo cliente'}</DialogTitle>
+            <DialogDescription>
+              {editingClient
+                ? 'Altere os dados do cliente e salve.'
+                : 'Preencha os dados do novo cliente.'}
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <ClientFormFields
+                handleLogoChange={handleLogoChange}
+                handleSignatureChange={handleSignatureChange}
+                uploadingLogo={uploadingLogo}
+                uploadingSignature={uploadingSignature}
+              />
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setModalOpen(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={isPending}>
+                  {isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Salvando...
+                    </>
+                  ) : (
+                    'Salvar'
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }
-

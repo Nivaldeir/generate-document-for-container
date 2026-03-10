@@ -15,9 +15,25 @@ export function BrazilBiSelect() {
     (value: string) => {
       const client = clients.find((c) => c.id === value)
       if (!client) return
-      form.setValue('brazilBiName', client.name, { shouldDirty: true, shouldTouch: true })
-      form.setValue('brazilBiCnpj', client.cnpj, { shouldDirty: true, shouldTouch: true })
-      form.setValue('brazilBiAddress', client.address, { shouldDirty: true, shouldTouch: true })
+      const opts = { shouldDirty: true, shouldTouch: true }
+      form.setValue('brazilBiName', client.name, opts)
+      form.setValue('brazilBiCnpj', client.cnpj, opts)
+      form.setValue('brazilBiAddress', client.address, opts)
+      form.setValue('logoUrl', client.logoUrl ?? '', opts)
+      form.setValue('signatureUrl', client.signatureUrl ?? '', opts)
+      form.setValue('beneficiaryBank', client.beneficiaryBank ?? '', opts)
+      form.setValue('bankCode', client.bankCode ?? '', opts)
+      form.setValue('branchCode', client.branchCode ?? '', opts)
+      form.setValue('swiftCode', client.swiftCode ?? '', opts)
+      form.setValue('swiftBic', client.swiftBic ?? '', opts)
+      form.setValue('intermediaryBank', client.intermediaryBank ?? '', opts)
+      form.setValue('accountNumber', client.accountNumber ?? '', opts)
+      form.setValue('routingNumber', client.routingNumber ?? '', opts)
+      form.setValue('beneficiaryAddress', client.beneficiaryAddress ?? '', opts)
+      if (typeof window !== 'undefined') {
+        if (client.logoUrl) window.localStorage.setItem('form-logo', client.logoUrl)
+        if (client.signatureUrl) window.localStorage.setItem('form-signature', client.signatureUrl)
+      }
     },
     [clients, form]
   )

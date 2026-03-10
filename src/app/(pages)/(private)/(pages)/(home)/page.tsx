@@ -1,7 +1,6 @@
 'use client'
 
 import type { SubmitHandler } from 'react-hook-form'
-import { useState } from 'react'
 import { Button } from '@/src/shared/components/ui/button'
 import { Input } from '@/src/shared/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/shared/components/ui/card'
@@ -50,7 +49,7 @@ export default function HomePage() {
     trackingError,
   } = useHomeHook()
 
-  const [isLoading, setIsLoading] = useState(false)
+  const isFormDisabled = loading || processing || serviceLoading
 
   return (
     <div className="p-4 sm:p-8">
@@ -75,7 +74,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Nome Completo</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -88,7 +87,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>CNPJ</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -101,42 +100,7 @@ export default function HomePage() {
                     <FormItem className="sm:col-span-2">
                       <FormLabel>Endereço Completo</FormLabel>
                       <FormControl>
-                        <Textarea disabled={isLoading} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Dados do Consignee</CardTitle>
-                <CardDescription>Informações do destinatário</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="consigneeName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome</FormLabel>
-                      <FormControl>
-                        <Input disabled={isLoading} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="consigneeAddress"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Endereço</FormLabel>
-                      <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Textarea disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -159,7 +123,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Nome</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -172,7 +136,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>CNPJ</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -185,7 +149,7 @@ export default function HomePage() {
                     <FormItem className="sm:col-span-2">
                       <FormLabel>Endereço</FormLabel>
                       <FormControl>
-                        <Textarea disabled={isLoading} {...field} />
+                        <Textarea disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -207,7 +171,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Booking No.</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -222,7 +186,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Navio/Viagem</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -235,7 +199,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Porto de Embarque</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -248,7 +212,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Porto de Descarga</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -261,7 +225,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Data de Embarque</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -283,7 +247,7 @@ export default function HomePage() {
                     <FormItem className="sm:col-span-2">
                       <FormLabel>Containers</FormLabel>
                       <FormControl>
-                        <Textarea disabled={isLoading} {...field} />
+                        <Textarea disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -296,7 +260,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Pacotes</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -309,7 +273,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Descrição</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -322,7 +286,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>NCM</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -335,7 +299,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Peso Líquido (KGS)</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -348,7 +312,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Peso Bruto (KGS)</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -361,7 +325,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Medida (CBM)</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -426,7 +390,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Valor do Frete</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -438,7 +402,7 @@ export default function HomePage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Incoterm</FormLabel>
-                      <Select disabled={isLoading} onValueChange={field.onChange} value={field.value}>
+                      <Select disabled={isFormDisabled} onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue />
@@ -462,7 +426,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Número da Invoice</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -475,7 +439,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Circular</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -497,7 +461,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Banco Beneficiário (opcional)</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -510,7 +474,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Bank Code (opcional)</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -523,7 +487,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>SWIFT Code (opcional)</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -536,7 +500,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>SWIFT/BIC (opcional)</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -549,7 +513,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Intermediary Bank (opcional)</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -562,7 +526,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Número da Conta</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -575,7 +539,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Routing Number</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -588,7 +552,7 @@ export default function HomePage() {
                     <FormItem>
                       <FormLabel>Branch Code (opcional)</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -601,7 +565,7 @@ export default function HomePage() {
                     <FormItem className="sm:col-span-2">
                       <FormLabel>Bank Add / Endereço do Banco (opcional)</FormLabel>
                       <FormControl>
-                        <Input disabled={isLoading} {...field} />
+                        <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -610,62 +574,7 @@ export default function HomePage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Identidade visual (opcional)</CardTitle>
-                <CardDescription>
-                  Logo da empresa e assinatura digital que serão usados nos documentos gerados.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <FormLabel className="text-sm">Logo</FormLabel>
-                    {logoPreview && (
-                      <div className="flex items-center gap-2">
-                        <div className="border rounded bg-white p-1.5 shrink-0">
-                          <img src={logoPreview} alt="Logo" className="h-10 w-auto object-contain" />
-                        </div>
-                        <span className="text-xs text-muted-foreground">Substitua enviando outro arquivo.</span>
-                      </div>
-                    )}
-                    <FormControl>
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleAssetChange(e, 'logo')}
-                        disabled={uploadingLogo}
-                        className="text-sm"
-                      />
-                    </FormControl>
-                    {uploadingLogo && <p className="text-xs text-muted-foreground">Enviando...</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <FormLabel className="text-sm">Assinatura</FormLabel>
-                    {signaturePreview && (
-                      <div className="flex items-center gap-2">
-                        <div className="border rounded bg-white p-1.5 shrink-0">
-                          <img src={signaturePreview} alt="Assinatura" className="h-8 w-auto object-contain" />
-                        </div>
-                        <span className="text-xs text-muted-foreground">Substitua enviando outra imagem.</span>
-                      </div>
-                    )}
-                    <FormControl>
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleAssetChange(e, 'signature')}
-                        disabled={uploadingSignature}
-                        className="text-sm"
-                      />
-                    </FormControl>
-                    {uploadingSignature && <p className="text-xs text-muted-foreground">Enviando...</p>}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between max-w-md">
               <div className="flex flex-col gap-2 sm:flex-row sm:flex-1">
                 <Button
                   type="submit"
@@ -690,7 +599,7 @@ export default function HomePage() {
                   variant="outline"
                   size="lg"
                   className="flex-1"
-                  disabled={serviceLoading || loading || processing}
+                  disabled={serviceLoading || loading || processing || form.getValues('invoiceType') !== 'service'}
                   onClick={form.handleSubmit(
                     onGenerateServiceInvoice as SubmitHandler<FormDocValues>
                   )}

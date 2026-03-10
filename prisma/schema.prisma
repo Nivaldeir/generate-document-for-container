@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 model User {
@@ -14,6 +14,8 @@ model User {
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
   files     UploadedFile[]
+
+  @@map("users")
 }
 
 model UploadedFile {
@@ -28,24 +30,41 @@ model UploadedFile {
   userId         String?
   user           User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt      DateTime @default(now())
+
+  @@map("uploaded_files")
 }
 
 model PdfGenerationJob {
-  id         String    @id @default(cuid())
-  status     String    @default("PENDING")
-  batchId    String?
-  formData   String
-  result     String?
-  error      String?
-  createdAt  DateTime  @default(now())
+  id          String    @id @default(cuid())
+  status      String    @default("PENDING")
+  batchId     String?
+  formData    String
+  result      String?
+  error       String?
+  createdAt   DateTime  @default(now())
   completedAt DateTime?
+
+  @@map("pdf_generation_jobs")
 }
 
 model Client {
-  id        String   @id @default(cuid())
-  name      String
-  cnpj      String
-  address   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String   @id @default(cuid())
+  name               String
+  cnpj               String
+  address            String
+  beneficiaryBank    String?
+  bankCode           String?
+  branchCode         String?
+  swiftCode          String?
+  swiftBic           String?
+  intermediaryBank   String?
+  accountNumber      String?
+  routingNumber      String?
+  beneficiaryAddress String?
+  logoUrl            String?
+  signatureUrl       String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("clients")
 }

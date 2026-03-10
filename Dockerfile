@@ -33,15 +33,13 @@ RUN apk add --no-cache \
     xdg-utils
 
 ENV PUPPETEER_SKIP_DOWNLOAD=true
-ENV DATABASE_URL=file:./dev.db
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 COPY . .
 
 RUN pnpm prisma generate
-RUN pnpm prisma migrate deploy
 RUN pnpm run build
 
 EXPOSE 3000
 
-CMD ["pnpm", "start"]
+CMD ["sh", "-c", "pnpm prisma db push && pnpm start"]
