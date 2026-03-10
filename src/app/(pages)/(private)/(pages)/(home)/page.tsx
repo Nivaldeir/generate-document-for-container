@@ -42,6 +42,7 @@ export default function HomePage() {
   } = useHomeHook()
 
   const isFormDisabled = loading || processing || serviceLoading
+  const invoiceType = form.watch('invoiceType')
 
   return (
     <div className="p-4 sm:p-8">
@@ -53,18 +54,19 @@ export default function HomePage() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit as SubmitHandler<FormDocValues>)} className="space-y-6">
+
             <Card>
               <CardHeader>
-                <CardTitle>Dados do Shipper/Exportador</CardTitle>
-                <CardDescription>Informações do remetente da carga</CardDescription>
+                <CardTitle>Brazil Business Intelligence</CardTitle>
+                <CardDescription>Dados do agente no Brasil</CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-2">
                 <FormField
                   control={form.control}
-                  name="shipperName"
+                  name="brazilBiName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nome Completo</FormLabel>
+                      <FormLabel>Nome</FormLabel>
                       <FormControl>
                         <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
@@ -74,7 +76,7 @@ export default function HomePage() {
                 />
                 <FormField
                   control={form.control}
-                  name="shipperCnpj"
+                  name="brazilBiCnpj"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>CNPJ</FormLabel>
@@ -87,10 +89,10 @@ export default function HomePage() {
                 />
                 <FormField
                   control={form.control}
-                  name="shipperAddress"
+                  name="brazilBiAddress"
                   render={({ field }) => (
                     <FormItem className="sm:col-span-2">
-                      <FormLabel>Endereço Completo</FormLabel>
+                      <FormLabel>Endereço</FormLabel>
                       <FormControl>
                         <Textarea disabled={isFormDisabled} {...field} />
                       </FormControl>
@@ -139,16 +141,16 @@ export default function HomePage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Brazil Business Intelligence</CardTitle>
-                <CardDescription>Dados do agente no Brasil</CardDescription>
+                <CardTitle>Dados Bancários</CardTitle>
+                <CardDescription>Informações da conta beneficiária</CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-2">
                 <FormField
                   control={form.control}
-                  name="brazilBiName"
+                  name="beneficiaryBank"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nome</FormLabel>
+                      <FormLabel>Banco Beneficiário (opcional)</FormLabel>
                       <FormControl>
                         <Input disabled={isFormDisabled} {...field} />
                       </FormControl>
@@ -158,7 +160,272 @@ export default function HomePage() {
                 />
                 <FormField
                   control={form.control}
-                  name="brazilBiCnpj"
+                  name="bankCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bank Code (opcional)</FormLabel>
+                      <FormControl>
+                        <Input disabled={isFormDisabled} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="swiftCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>SWIFT Code (opcional)</FormLabel>
+                      <FormControl>
+                        <Input disabled={isFormDisabled} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="swiftBic"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>SWIFT/BIC (opcional)</FormLabel>
+                      <FormControl>
+                        <Input disabled={isFormDisabled} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="intermediaryBank"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Intermediary Bank (opcional)</FormLabel>
+                      <FormControl>
+                        <Input disabled={isFormDisabled} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="accountNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Número da Conta</FormLabel>
+                      <FormControl>
+                        <Input disabled={isFormDisabled} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="routingNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Routing Number</FormLabel>
+                      <FormControl>
+                        <Input disabled={isFormDisabled} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="branchCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Branch Code (opcional)</FormLabel>
+                      <FormControl>
+                        <Input disabled={isFormDisabled} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="beneficiaryAddress"
+                  render={({ field }) => (
+                    <FormItem className="sm:col-span-2">
+                      <FormLabel>Bank Add / Endereço do Banco (opcional)</FormLabel>
+                      <FormControl>
+                        <Input disabled={isFormDisabled} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Dados Financeiros</CardTitle>
+                <CardDescription>Valores e condições de pagamento</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 sm:grid-cols-3">
+                <FormField
+                  control={form.control}
+                  name="invoiceType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo de Invoice</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="freight">Frete</SelectItem>
+                          <SelectItem value="service">Serviço</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="currency"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Moeda</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="USD">USD</SelectItem>
+                          <SelectItem value="EUR">EUR</SelectItem>
+                          <SelectItem value="BRL">BRL</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="freightValue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Valor do Frete</FormLabel>
+                      <FormControl>
+                        <Input disabled={isFormDisabled} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="incoterm"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Incoterm</FormLabel>
+                      <Select disabled={isFormDisabled} onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="FOB">FOB</SelectItem>
+                          <SelectItem value="CIF">CIF</SelectItem>
+                          <SelectItem value="CFR">CFR</SelectItem>
+                          <SelectItem value="EXW">EXW</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="invoiceNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Número da Invoice</FormLabel>
+                      <FormControl>
+                        <Input disabled={isFormDisabled} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="circular"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Circular</FormLabel>
+                      <FormControl>
+                        <Input disabled={isFormDisabled} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            {invoiceType === 'service' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Descrição do Serviço</CardTitle>
+                  <CardDescription>Texto que aparecerá no topo da Invoice de serviço.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <FormField
+                    control={form.control}
+                    name="serviceDescription"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Descrição detalhada</FormLabel>
+                        <FormControl>
+                          <Textarea disabled={isFormDisabled} rows={4} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Dados do Shipper/Exportador</CardTitle>
+                <CardDescription>Informações do remetente da carga</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="shipperName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome Completo</FormLabel>
+                      <FormControl>
+                        <Input disabled={isFormDisabled} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="shipperCnpj"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>CNPJ</FormLabel>
@@ -171,10 +438,10 @@ export default function HomePage() {
                 />
                 <FormField
                   control={form.control}
-                  name="brazilBiAddress"
+                  name="shipperAddress"
                   render={({ field }) => (
                     <FormItem className="sm:col-span-2">
-                      <FormLabel>Endereço</FormLabel>
+                      <FormLabel>Endereço Completo</FormLabel>
                       <FormControl>
                         <Textarea disabled={isFormDisabled} {...field} />
                       </FormControl>
@@ -351,246 +618,6 @@ export default function HomePage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Medida (CBM)</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Dados Financeiros</CardTitle>
-                <CardDescription>Valores e condições de pagamento</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-3">
-                <FormField
-                  control={form.control}
-                  name="invoiceType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tipo de Invoice</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="freight">Frete</SelectItem>
-                          <SelectItem value="service">Serviço</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="currency"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Moeda</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="USD">USD</SelectItem>
-                          <SelectItem value="EUR">EUR</SelectItem>
-                          <SelectItem value="BRL">BRL</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="freightValue"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Valor do Frete</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="incoterm"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Incoterm</FormLabel>
-                      <Select disabled={isFormDisabled} onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="FOB">FOB</SelectItem>
-                          <SelectItem value="CIF">CIF</SelectItem>
-                          <SelectItem value="CFR">CFR</SelectItem>
-                          <SelectItem value="EXW">EXW</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="invoiceNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Número da Invoice</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="circular"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Circular</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Dados Bancários</CardTitle>
-                <CardDescription>Informações da conta beneficiária</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="beneficiaryBank"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Banco Beneficiário (opcional)</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="bankCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Bank Code (opcional)</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="swiftCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>SWIFT Code (opcional)</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="swiftBic"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>SWIFT/BIC (opcional)</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="intermediaryBank"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Intermediary Bank (opcional)</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="accountNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Número da Conta</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="routingNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Routing Number</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="branchCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Branch Code (opcional)</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="beneficiaryAddress"
-                  render={({ field }) => (
-                    <FormItem className="sm:col-span-2">
-                      <FormLabel>Bank Add / Endereço do Banco (opcional)</FormLabel>
                       <FormControl>
                         <Input disabled={isFormDisabled} {...field} />
                       </FormControl>

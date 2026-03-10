@@ -133,6 +133,9 @@
 
     <div class="section">
       <div class="section-title">Service details</div>
+      <% if (typeof serviceDescription !== 'undefined' && serviceDescription) { %>
+        <p style="margin-bottom: 8px;"><%= serviceDescription %></p>
+      <% } %>
       <table>
         <thead>
           <tr>
