@@ -26,7 +26,7 @@ import { FileText, Loader2 } from 'lucide-react'
 import type { FormDocValues } from './utils/home.utils'
 import { useHomeHook } from './hook/use-home.hook'
 import { BlNumbersField } from './_components/bl-numbers-field'
-import { BrazilBiSelect } from './_components/brazil-bi-select'
+import { ConsigneeClientSelect } from './_components/consignee-client-select'
 
 export default function HomePage() {
   const {
@@ -103,11 +103,46 @@ export default function HomePage() {
 
             <Card>
               <CardHeader>
+                <CardTitle>Dados do Consignee</CardTitle>
+                <CardDescription>Importador / destinatário da carga</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 sm:grid-cols-2">
+                <ConsigneeClientSelect />
+                <FormField
+                  control={form.control}
+                  name="consigneeName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome</FormLabel>
+                      <FormControl>
+                        <Input disabled={isFormDisabled} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="consigneeAddress"
+                  render={({ field }) => (
+                    <FormItem className="sm:col-span-2">
+                      <FormLabel>Endereço</FormLabel>
+                      <FormControl>
+                        <Textarea disabled={isFormDisabled} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
                 <CardTitle>Brazil Business Intelligence</CardTitle>
                 <CardDescription>Dados do agente no Brasil</CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-2">
-                <BrazilBiSelect />
                 <FormField
                   control={form.control}
                   name="brazilBiName"
