@@ -89,24 +89,69 @@ export function useHomeHook() {
     setLoading(true)
     setSuccess(false)
     try {
-      toast.promise(async () => {
+      const task = (async () => {
         const enqueueRes = await fetch('/api/generate-pdfs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         })
         if (!enqueueRes.ok) {
-          const err = await enqueueRes.json()
-          throw new Error(err.message ?? err.error ?? 'Falha ao enfileirar')
+          const err = await enqueueRes.json().catch(() => null)
+          throw new Error(err?.message ?? err?.error ?? 'Falha ao enfileirar geração de PDFs')
         }
-      }, {
-        loading: 'Gerando PDFs...',
-        success: 'PDFs gerados com sucesso!',
-        error: 'Erro ao gerar PDFs',
-      })
+
+        await enqueueRes.json().catch(() => null)
+
+        let attempts = 0
+        let lastError: string | undefined
+
+        while (attempts < 5) {
+          const workerRes = await fetch('/api/worker/process-pdf', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          })
+
+          if (!workerRes.ok) {
+            const err = await workerRes.json().catch(() => null)
+            lastError = err?.error ?? 'Falha ao processar geração de PDFs'
+            break
+          }
+
+          const workerJson = await workerRes.json().catch(() => null)
+          if (workerJson?.error) {
+            lastError = workerJson.error as string
+            break
+          }
+
+          if (!workerJson?.processed) {
+            attempts += 1
+            await new Promise((resolve) => setTimeout(resolve, 500))
+            continue
+          }
+
+          break
+        }
+
+        if (lastError) {
+          throw new Error(lastError)
+        }
+      })()
+
+      const minDelay = new Promise((resolve) => setTimeout(resolve, 2000))
+
+      await Promise.all([
+        toast.promise(task, {
+          loading: 'Gerando PDFs...',
+          success: 'PDFs gerados com sucesso!',
+          error: 'Erro ao gerar PDFs',
+        }),
+        minDelay,
+      ])
+      setSuccess(true)
     } catch (error) {
       console.error('[home] Erro ao processar requisição:', error)
       alert(error instanceof Error ? error.message : 'Erro ao processar requisição')
+    } finally {
       setLoading(false)
     }
   }
