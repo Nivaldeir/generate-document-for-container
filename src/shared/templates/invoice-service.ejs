@@ -125,7 +125,7 @@
         <div class="invoice-title">INVOICE</div>
         <div class="invoice-info" style="margin-top: 8px;">
           <div><span class="label">Number:</span> <%= invoiceNumber %></div>
-          <div style="margin-top: 4px;"><span class="label">Date:</span> <%= invoiceDate %></div>
+          <div style="margin-top: 4px;"><span class="label">Date:</span> <%= typeof documentDate !== 'undefined' && documentDate ? documentDate : invoiceDate %></div>
           <div style="margin-top: 4px;"><span class="label">Currency:</span> <%= currency %></div>
         </div>
       </div>
@@ -184,8 +184,9 @@
         <div><span class="label">Intermediary bank:</span> <%= intermediaryBank %></div>
       <% } %>
       <div><span class="label">Account:</span> <%= accountNumber %></div>
+      <% if (typeof routingNumber !== 'undefined' && routingNumber) { %>
       <div><span class="label">Routing:</span> <%= routingNumber %></div>
-      <div><span class="label">Correspondent:</span> <%= correspondent %></div>
+      <% } %>
     </div>
 
     <div class="footer-note">

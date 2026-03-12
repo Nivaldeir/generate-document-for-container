@@ -114,6 +114,9 @@
     <div style="margin-top: 10px;">
       <strong>CIRCULAR:</strong> <%= circular %>
     </div>
+    <% if (typeof documentDate !== 'undefined' && documentDate) { %>
+    <div style="margin-top: 5px;"><strong>Data:</strong> <%= documentDate %></div>
+    <% } %>
   </div>
 
   <div class="grid">
@@ -179,12 +182,11 @@
         <div class="info-row">
           <span class="label">BENEFICIARY ACCOUNT:</span> <%= accountNumber %>
         </div>
-        <div class="info-row">
-          <span class="label">US Correspondent:</span> <%= correspondent %>
-        </div>
+        <% if (typeof routingNumber !== 'undefined' && routingNumber) { %>
         <div class="info-row">
           <span class="label">Routing #:</span> <%= routingNumber %><% if (beneficiaryBank) { %> / MEMO FIELD: <%= beneficiaryBank %> / <%= routingNumber %><% } %>
         </div>
+        <% } %>
       </div>
     </div>
   </div>

@@ -136,7 +136,7 @@
       <div class="invoice-title">INVOICE</div>
       <div class="invoice-info" style="margin-top: 10px;">
         <div><strong>Invoice Nº</strong> <%= invoiceNumber %></div>
-        <div style="margin-top: 5px;"><strong>Date:</strong> <%= invoiceDate %></div>
+        <div style="margin-top: 5px;"><strong>Date:</strong> <%= typeof documentDate !== 'undefined' && documentDate ? documentDate : invoiceDate %></div>
         <% if (typeof blNumber !== 'undefined' && blNumber) { %>
         <div style="margin-top: 5px;"><strong>B/L(s):</strong> <%= blNumber %></div>
         <% } %>
@@ -213,12 +213,11 @@
       <div class="info-row">
         <span class="label">BENEFICIARY ACCOUNT:</span> <%= accountNumber %>
       </div>
-      <div class="info-row">
-        <span class="label">US Correspondent:</span> <%= correspondent %>
-      </div>
+      <% if (typeof routingNumber !== 'undefined' && routingNumber) { %>
       <div class="info-row">
         <span class="label">Routing #:</span> <%= routingNumber %><% if (beneficiaryBank) { %> / MEMO FIELD: <%= beneficiaryBank %> / <%= routingNumber %><% } %>
       </div>
+      <% } %>
     </div>
   </div>
 

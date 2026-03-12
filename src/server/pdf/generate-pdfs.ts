@@ -13,6 +13,65 @@ export type PdfGenerationResult = {
   invoice: string
 }
 
+const PUBLIC_DIR = path.join(process.cwd(), 'public')
+
+function isDataUrl(str: string): boolean {
+  return typeof str === 'string' && str.startsWith('data:')
+}
+
+function isHttpUrl(str: string): boolean {
+  return typeof str === 'string' && (str.startsWith('http://') || str.startsWith('https://'))
+}
+
+function getMimeFromPath(filePath: string): string {
+  const ext = path.extname(filePath).toLowerCase()
+  const mime: Record<string, string> = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.gif': 'image/gif', '.webp': 'image/webp' }
+  return mime[ext] ?? 'image/png'
+}
+
+async function urlToDataUrl(url: string): Promise<string> {
+  if (!url || isDataUrl(url)) return url
+  if (isHttpUrl(url)) {
+    try {
+      const res = await fetch(url, { cache: 'no-store' })
+      if (!res.ok) return url
+      const buf = Buffer.from(await res.arrayBuffer())
+      const contentType = res.headers.get('content-type') ?? 'image/png'
+      return `data:${contentType};base64,${buf.toString('base64')}`
+    } catch {
+      return url
+    }
+  }
+  const pathname = url.startsWith('/') ? url.slice(1) : url
+  if (pathname.startsWith('upload/')) {
+    try {
+      const filePath = path.join(PUBLIC_DIR, pathname)
+      const resolved = path.resolve(filePath)
+      if (!resolved.startsWith(path.resolve(PUBLIC_DIR))) return url
+      const buf = fs.readFileSync(resolved)
+      const mime = getMimeFromPath(resolved)
+      return `data:${mime};base64,${buf.toString('base64')}`
+    } catch {
+      return url
+    }
+  }
+  return url
+}
+
+async function resolveImageUrls(formData: PdfFormData): Promise<PdfFormData> {
+  const logoUrl = formData.logoUrl as string | undefined
+  const signatureUrl = formData.signatureUrl as string | undefined
+  const [resolvedLogo, resolvedSignature] = await Promise.all([
+    logoUrl ? urlToDataUrl(logoUrl) : Promise.resolve(''),
+    signatureUrl ? urlToDataUrl(signatureUrl) : Promise.resolve(''),
+  ])
+  return {
+    ...formData,
+    logoUrl: resolvedLogo || formData.logoUrl,
+    signatureUrl: resolvedSignature || formData.signatureUrl,
+  }
+}
+
 function templateData(formData: PdfFormData): PdfFormData & { blNumber: string } {
   const blNumbers = Array.isArray(formData.blNumbers) ? (formData.blNumbers as string[]) : []
   const blNumber = blNumbers.length ? blNumbers.join(', ') : String((formData as { blNumber?: string }).blNumber ?? '')
@@ -25,7 +84,8 @@ export async function generatePdfs(formData: PdfFormData): Promise<PdfGeneration
   const invoiceFreightTemplate = fs.readFileSync(path.join(TEMPLATES_DIR, 'invoice.ejs'), 'utf-8')
   const invoiceServiceTemplate = fs.readFileSync(path.join(TEMPLATES_DIR, 'invoice-service.ejs'), 'utf-8')
 
-  const data = templateData(formData)
+  const withImages = await resolveImageUrls(formData)
+  const data = templateData(withImages)
   const blHtml = ejs.render(blTemplate, data)
   const paymentHtml = ejs.render(paymentTemplate, data)
   const isServiceInvoice = formData.invoiceType === 'service'

@@ -252,7 +252,7 @@
   <div class="bottom-info">
     <div class="section">
       <div class="section-title">PLACE AND DATE OF ISSUE</div>
-      <div><%= issueDate %></div>
+      <div><%= typeof documentDate !== 'undefined' && documentDate ? documentDate : (issueDate || '') %></div>
       <div style="margin-top: 10px;">
         <div class="bold">SHIPPED ON BOARD DATE:</div>
         <div><%= shippedOnBoardDate %></div>

@@ -39,6 +39,9 @@ export default function HomePage() {
     success,
     trackingOpen,
     setTrackingOpen,
+    handleAssetChange,
+    uploadingLogo,
+    logoPreview,
   } = useHomeHook()
 
   const isFormDisabled = loading || processing || serviceLoading
@@ -61,6 +64,29 @@ export default function HomePage() {
                 <CardDescription>Dados do agente no Brasil</CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="logoUrl"
+                  render={() => (
+                    <FormItem className="sm:col-span-2">
+                      <FormLabel>Logo da empresa (aparece na Invoice e demais documentos)</FormLabel>
+                      <FormControl>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            disabled={isFormDisabled || uploadingLogo}
+                            onChange={(e) => void handleAssetChange(e, 'logo')}
+                          />
+                          {logoPreview && (
+                            <img src={logoPreview} alt="Logo" className="h-10 w-auto object-contain border rounded" />
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="brazilBiName"
@@ -271,6 +297,19 @@ export default function HomePage() {
                 <CardDescription>Valores e condições de pagamento</CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-3">
+                <FormField
+                  control={form.control}
+                  name="documentDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data</FormLabel>
+                      <FormControl>
+                        <Input disabled={isFormDisabled} placeholder="ex: 02/10/2025" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="invoiceType"

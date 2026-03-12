@@ -90,10 +90,15 @@ export function useHomeHook() {
     setSuccess(false)
     try {
       const task = (async () => {
+        const payload = {
+          ...data,
+          logoUrl: data.logoUrl ?? form.getValues('logoUrl') ?? '',
+          signatureUrl: data.signatureUrl ?? form.getValues('signatureUrl') ?? '',
+        }
         const enqueueRes = await fetch('/api/generate-pdfs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
+          body: JSON.stringify(payload),
         })
         if (!enqueueRes.ok) {
           const err = await enqueueRes.json().catch(() => null)
