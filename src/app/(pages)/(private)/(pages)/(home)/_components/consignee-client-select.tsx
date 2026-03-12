@@ -27,6 +27,8 @@ export function ConsigneeClientSelect() {
       form.setValue('accountNumber', client.accountNumber ?? '', opts)
       form.setValue('routingNumber', client.routingNumber ?? '', opts)
       form.setValue('beneficiaryAddress', client.beneficiaryAddress ?? '', opts)
+      form.setValue('logoUrl', client.logoUrl ?? '', opts)
+      form.setValue('signatureUrl', client.signatureUrl ?? '', opts)
     },
     [clients, form]
   )
