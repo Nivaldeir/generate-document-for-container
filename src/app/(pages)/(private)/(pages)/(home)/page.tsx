@@ -39,9 +39,6 @@ export default function HomePage() {
     success,
     trackingOpen,
     setTrackingOpen,
-    handleAssetChange,
-    uploadingLogo,
-    logoPreview,
   } = useHomeHook()
 
   const isFormDisabled = loading || processing || serviceLoading
@@ -57,6 +54,16 @@ export default function HomePage() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit as SubmitHandler<FormDocValues>)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="logoUrl"
+              render={({ field }) => <Input type="hidden" {...field} value={field.value ?? ''} />}
+            />
+            <FormField
+              control={form.control}
+              name="signatureUrl"
+              render={({ field }) => <Input type="hidden" {...field} value={field.value ?? ''} />}
+            />
 
             <Card>
               <CardHeader>
@@ -64,29 +71,6 @@ export default function HomePage() {
                 <CardDescription>Dados do agente no Brasil</CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="logoUrl"
-                  render={() => (
-                    <FormItem className="sm:col-span-2">
-                      <FormLabel>Logo da empresa (aparece na Invoice e demais documentos)</FormLabel>
-                      <FormControl>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            disabled={isFormDisabled || uploadingLogo}
-                            onChange={(e) => void handleAssetChange(e, 'logo')}
-                          />
-                          {logoPreview && (
-                            <img src={logoPreview} alt="Logo" className="h-10 w-auto object-contain border rounded" />
-                          )}
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <FormField
                   control={form.control}
                   name="brazilBiName"

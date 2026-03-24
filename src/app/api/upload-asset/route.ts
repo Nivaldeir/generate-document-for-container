@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
+import { randomUUID } from 'crypto'
 
 const ALLOWED_TYPES = ['logo', 'signature'] as const
 const UPLOAD_DIR = join(process.cwd(), 'public', 'upload')
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
 
     const buffer = Buffer.from(await file.arrayBuffer())
     const ext = getExtension(file.type)
-    const filename = `${ASSET_NAMES[type]}${ext}`
+    const filename = `${ASSET_NAMES[type]}-${Date.now()}-${randomUUID()}${ext}`
     const filepath = join(UPLOAD_DIR, filename)
 
     await mkdir(UPLOAD_DIR, { recursive: true })

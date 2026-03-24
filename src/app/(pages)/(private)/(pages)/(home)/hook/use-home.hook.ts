@@ -1,18 +1,8 @@
-import { useSyncExternalStore, useState, useEffect } from "react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { DEFAULT_VALUES, formDocSchema, FormDocValues } from "../utils/home.utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
-
-const emptySubscribe = () => () => { }
-function getStoredLogo(): string | null {
-  if (typeof window === 'undefined') return null
-  return window.localStorage.getItem('form-logo')
-}
-function getStoredSignature(): string | null {
-  if (typeof window === 'undefined') return null
-  return window.localStorage.getItem('form-signature')
-}
 
 export function useHomeHook() {
   const [uploadingLogo, setUploadingLogo] = useState(false)
@@ -22,32 +12,10 @@ export function useHomeHook() {
   const [serviceLoading, setServiceLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [trackingOpen, setTrackingOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
-
-  const storedLogo = useSyncExternalStore(
-    emptySubscribe,
-    () => (mounted ? getStoredLogo() : null),
-    () => null
-  )
-  const storedSignature = useSyncExternalStore(
-    emptySubscribe,
-    () => (mounted ? getStoredSignature() : null),
-    () => null
-  )
-
   const form = useForm<FormDocValues>({
     resolver: zodResolver(formDocSchema),
     defaultValues: DEFAULT_VALUES as FormDocValues,
   })
-
-  useEffect(() => {
-    if (storedLogo) form.setValue('logoUrl', storedLogo)
-    if (storedSignature) form.setValue('signatureUrl', storedSignature)
-  }, [storedLogo, storedSignature, form])
-
-  const logoPreview = storedLogo
-  const signaturePreview = storedSignature
 
   const handleAssetChange = async (event: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'signature') => {
     const file = event.target.files?.[0]
@@ -69,10 +37,8 @@ export function useHomeHook() {
       if (url) {
         if (type === 'logo') {
           form.setValue('logoUrl', url)
-          if (typeof window !== 'undefined') window.localStorage.setItem('form-logo', url)
         } else {
           form.setValue('signatureUrl', url)
-          if (typeof window !== 'undefined') window.localStorage.setItem('form-signature', url)
         }
       }
     } catch (e) {
@@ -90,10 +56,12 @@ export function useHomeHook() {
     setSuccess(false)
     try {
       const task = (async () => {
+        const currentValues = form.getValues()
         const payload = {
+          ...currentValues,
           ...data,
-          logoUrl: data.logoUrl ?? form.getValues('logoUrl') ?? '',
-          signatureUrl: data.signatureUrl ?? form.getValues('signatureUrl') ?? '',
+          logoUrl: currentValues.logoUrl ?? data.logoUrl ?? '',
+          signatureUrl: currentValues.signatureUrl ?? data.signatureUrl ?? '',
         }
         const enqueueRes = await fetch('/api/generate-pdfs', {
           method: 'POST',
@@ -165,7 +133,14 @@ export function useHomeHook() {
     if (serviceLoading) return
     setServiceLoading(true)
     try {
-      const payload = { ...data, invoiceType: 'service' as const }
+      const currentValues = form.getValues()
+      const payload = {
+        ...currentValues,
+        ...data,
+        invoiceType: 'service' as const,
+        logoUrl: currentValues.logoUrl ?? data.logoUrl ?? '',
+        signatureUrl: currentValues.signatureUrl ?? data.signatureUrl ?? '',
+      }
       const response = await fetch('/api/download-pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -215,8 +190,6 @@ export function useHomeHook() {
     handleAssetChange,
     uploadingLogo,
     uploadingSignature,
-    logoPreview,
-    signaturePreview,
     loading,
     processing,
     serviceLoading,
