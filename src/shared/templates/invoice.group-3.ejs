@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body {
+    font-family: Arial;
+    margin: 0;
+    font-size: 11px;
+  }
+
+  .layout {
+    display: flex;
+  }
+
+  .left {
+    width: 35%;
+    background: #1e3a8a;
+    color: #fff;
+    padding: 20px;
+  }
+
+  .right {
+    width: 65%;
+    padding: 20px;
+  }
+
+  .logo {
+    max-height: 40px;
+    margin-bottom: 10px;
+  }
+
+  .title {
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  .card {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  td {
+    padding: 6px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .total {
+    text-align: right;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+  <div class="left">
+    <% if (logoUrl) { %><img src="<%= logoUrl %>" class="logo"><% } %>
+
+    <div><strong><%= brazilBiName %></strong></div>
+    <div><%= brazilBiAddress %></div>
+    <div>CNPJ: <%= brazilBiCnpj %></div>
+
+    <div style="margin-top:20px;">
+      <div>Invoice:</div>
+      <div><%= invoiceNumber %></div>
+
+      <div style="margin-top:10px;">Date:</div>
+      <div><%= documentDate || invoiceDate %></div>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="title">INVOICE</div>
+
+    <div class="card">
+      <strong><%= consigneeName %></strong><br>
+      <%= consigneeAddress %>
+    </div>
+
+    <div class="card">
+      B/L: <%= (blNumbers || []).join(', ') %>
+    </div>
+
+    <table>
+      <tr>
+        <td>International Maritime Freight</td>
+        <td style="text-align:right;"><%= currency %> <%= freightValue %></td>
+      </tr>
+    </table>
+
+    <div class="total">
+      TOTAL: <%= currency %> <%= freightValue %>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>

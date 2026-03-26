@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    margin: 0;
+    padding: 20px;
+    background: #fff;
+  }
+
+  .container {
+    max-width: 180mm;
+    margin: auto;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid #000;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+  }
+
+  .title {
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+
+  .logo {
+    max-height: 40px;
+  }
+
+  .card {
+    border: 1px solid #000;
+    padding: 6px;
+    margin-bottom: 6px;
+  }
+
+  .card-title {
+    font-size: 8px;
+    font-weight: bold;
+    background: #000;
+    color: #fff;
+    padding: 2px 4px;
+    margin-bottom: 4px;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+  }
+
+  .highlight {
+    font-weight: bold;
+    font-size: 11px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 6px;
+  }
+
+  table td {
+    border: 1px solid #000;
+    padding: 4px;
+  }
+
+  .footer {
+    margin-top: 10px;
+    font-size: 8px;
+    border-top: 1px solid #000;
+    padding-top: 6px;
+  }
+
+  .signature {
+    height: 60px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+  }
+
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="title">BILL OF LADING</div>
+    <% if (logoUrl) { %>
+      <img src="<%= logoUrl %>" class="logo"/>
+    <% } %>
+  </div>
+
+  <!-- SHIPPER / CONSIGNEE -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">SHIPPER</div>
+      <div><%= shipperName %></div>
+      <div><%= shipperAddress %></div>
+      <div>CNPJ: <%= shipperCnpj %></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">CONSIGNEE</div>
+      <div><%= consigneeName %></div>
+      <div><%= consigneeAddress %></div>
+    </div>
+  </div>
+
+  <!-- AGENT -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">NOTIFY PARTY</div>
+      SAME AS CONSIGNEE
+    </div>
+
+    <div class="card">
+      <div class="card-title">FORWARDING AGENT</div>
+      <div><%= brazilBiName %></div>
+      <div><%= brazilBiAddress %></div>
+      <div>CNPJ: <%= brazilBiCnpj %></div>
+    </div>
+  </div>
+
+  <!-- NUMBERS -->
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">BOOKING</div>
+      <div class="highlight"><%= bookingNo %></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">B/L NUMBER</div>
+      <div class="highlight"><%= blNumber %></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">ORIGINALS</div>
+      THREE (3)
+    </div>
+  </div>
+
+  <!-- ROUTE -->
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">VESSEL</div>
+      <%= vessel %>
+    </div>
+
+    <div class="card">
+      <div class="card-title">PORT OF LOADING</div>
+      <%= portOfLoading %>
+    </div>
+
+    <div class="card">
+      <div class="card-title">PORT OF DISCHARGE</div>
+      <%= portOfDischarge %>
+    </div>
+  </div>
+
+  <!-- DELIVERY -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">PLACE OF RECEIPT</div>
+      <%= placeOfReceipt %>
+    </div>
+
+    <div class="card">
+      <div class="card-title">PLACE OF DELIVERY</div>
+      <%= placeOfDelivery %>
+    </div>
+  </div>
+
+  <!-- CARGO -->
+  <div class="card">
+    <div class="card-title">CARGO DETAILS</div>
+
+    <div><strong>Containers:</strong> <%= containers %></div>
+    <div><%= containerType %></div>
+
+    <br>
+
+    <div><%= packages %> OF <%= description %></div>
+    <div>NCM: <%= ncm %></div>
+    <div>NET WT: <%= netWeight %> KGS</div>
+
+    <br>
+
+    <div class="highlight">SHIPPER'S LOAD AND COUNT AND SEAL</div>
+    <div>NO WOODEN MATERIAL INCLUDED</div>
+  </div>
+
+  <!-- WEIGHT -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">GROSS WEIGHT</div>
+      <div class="highlight"><%= grossWeight %> KGS</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">MEASUREMENT</div>
+      <div class="highlight"><%= measurement %> CBM</div>
+    </div>
+  </div>
+
+  <!-- FREIGHT TABLE -->
+  <table>
+    <tr>
+      <td><strong>ITEM</strong></td>
+      <td><strong>RATE</strong></td>
+      <td><strong>PREPAID</strong></td>
+      <td><strong>COLLECT</strong></td>
+    </tr>
+
+    <tr>
+      <td>FREIGHT</td>
+      <td></td>
+      <td><%= currency %> <%= freightValue %></td>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2"><strong>TOTAL</strong></td>
+      <td><strong><%= currency %> <%= freightValue %></strong></td>
+      <td></td>
+    </tr>
+  </table>
+
+  <!-- SIGNATURE -->
+  <div class="grid-2" style="margin-top:8px;">
+    <div class="card">
+      <div class="card-title">ISSUE DATE</div>
+      <%= documentDate || issueDate %>
+
+      <br><br>
+      <strong>SHIPPED ON BOARD:</strong><br>
+      <%= shippedOnBoardDate %>
+    </div>
+
+    <div class="card">
+      <div class="card-title">SIGNATURE</div>
+      <div class="signature">
+        <% if (signatureUrl) { %>
+          <img src="<%= signatureUrl %>" style="max-height:40px;">
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    RECEIVED in apparent good order and condition unless otherwise stated.
+    Subject to all terms and conditions of this Bill of Lading.
+  </div>
+
+</div>
+</body>
+</html>

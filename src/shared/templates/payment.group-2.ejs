@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body {
+    font-family: Arial;
+    font-size: 11px;
+    margin: 0;
+  }
+
+  .top {
+    background: #1e3a8a;
+    color: white;
+    padding: 15px;
+  }
+
+  .container {
+    padding: 20px;
+  }
+
+  .title {
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  .box {
+    border: 1px solid #cbd5e1;
+    padding: 10px;
+    margin-top: 10px;
+  }
+
+  .label {
+    font-weight: bold;
+    color: #1e3a8a;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  td, th {
+    border: 1px solid #cbd5e1;
+    padding: 8px;
+  }
+
+  th {
+    background: #e0ecff;
+  }
+
+  .total {
+    text-align: right;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 10px;
+    color: #1e3a8a;
+  }
+
+</style>
+</head>
+
+<body>
+
+<div class="top">
+  <% if (logoUrl) { %>
+    <div style="margin-bottom: 8px;">
+      <img src="<%= logoUrl %>" alt="Logo" style="max-height: 34px; max-width: 120px; object-fit: contain;">
+    </div>
+  <% } %>
+  <div class="title">PAGAMENTO DE FRETE</div>
+  <div>Circular: <%= circular %> | <%= documentDate || paymentDate %></div>
+</div>
+
+<div class="container">
+
+  <div class="grid">
+    <div class="box">
+      <div class="label">Remetente</div>
+      <%= brazilBiName %><br>
+      CNPJ: <%= brazilBiCnpj %>
+    </div>
+
+    <div class="box">
+      <div class="label">Recebedor</div>
+      <%= consigneeName %><br>
+      <%= consigneeAddress %>
+    </div>
+  </div>
+
+  <div class="box">
+    <table>
+      <tr>
+        <th>B/L</th>
+        <th>Incoterm</th>
+        <th>Valor</th>
+      </tr>
+
+      <% (blNumbers || []).forEach(function(bl) { %>
+      <tr>
+        <td><%= bl %></td>
+        <td><%= incoterm %></td>
+        <td><%= currency %> <%= freightValue %></td>
+      </tr>
+      <% }); %>
+    </table>
+
+    <div class="total">
+      TOTAL: <%= currency %> <%= freightValue %>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

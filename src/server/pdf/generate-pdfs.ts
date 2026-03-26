@@ -78,18 +78,37 @@ function templateData(formData: PdfFormData): PdfFormData & { blNumber: string }
   return { ...formData, blNumber }
 }
 
+function resolveTemplatePath(baseTemplateName: string, groupRaw: unknown): string {
+  const group = typeof groupRaw === 'string' ? groupRaw : 'default'
+  const safeGroup = ['default', 'group-1', 'group-2', 'group-3'].includes(group) ? group : 'default'
+  const groupedTemplateName =
+    safeGroup === 'default'
+      ? baseTemplateName
+      : `${baseTemplateName.replace('.ejs', '')}.${safeGroup}.ejs`
+  const groupedPath = path.join(TEMPLATES_DIR, groupedTemplateName)
+  return fs.existsSync(groupedPath) ? groupedPath : path.join(TEMPLATES_DIR, baseTemplateName)
+}
+
 export async function generatePdfs(formData: PdfFormData): Promise<PdfGenerationResult> {
-  const blTemplate = fs.readFileSync(path.join(TEMPLATES_DIR, 'bl.ejs'), 'utf-8')
-  const paymentTemplate = fs.readFileSync(path.join(TEMPLATES_DIR, 'payment.ejs'), 'utf-8')
-  const invoiceFreightTemplate = fs.readFileSync(path.join(TEMPLATES_DIR, 'invoice.ejs'), 'utf-8')
-  const invoiceServiceTemplate = fs.readFileSync(path.join(TEMPLATES_DIR, 'invoice-service.ejs'), 'utf-8')
+  const blTemplatePath = resolveTemplatePath('bl.ejs', formData.templateGroup)
+  const paymentTemplatePath = resolveTemplatePath('payment.ejs', formData.templateGroup)
+  const invoiceFreightTemplatePath = resolveTemplatePath('invoice.ejs', formData.templateGroup)
+  const invoiceServiceTemplatePath = resolveTemplatePath('invoice-service.ejs', formData.templateGroup)
+  const blTemplate = fs.readFileSync(blTemplatePath, 'utf-8')
+  const paymentTemplate = fs.readFileSync(paymentTemplatePath, 'utf-8')
+  const invoiceFreightTemplate = fs.readFileSync(invoiceFreightTemplatePath, 'utf-8')
+  const invoiceServiceTemplate = fs.readFileSync(invoiceServiceTemplatePath, 'utf-8')
 
   const withImages = await resolveImageUrls(formData)
   const data = templateData(withImages)
-  const blHtml = ejs.render(blTemplate, data)
-  const paymentHtml = ejs.render(paymentTemplate, data)
+  const blHtml = ejs.render(blTemplate, data, { filename: blTemplatePath })
+  const paymentHtml = ejs.render(paymentTemplate, data, { filename: paymentTemplatePath })
   const isServiceInvoice = formData.invoiceType === 'service'
-  const invoiceHtml = ejs.render(isServiceInvoice ? invoiceServiceTemplate : invoiceFreightTemplate, data)
+  const invoiceHtml = ejs.render(
+    isServiceInvoice ? invoiceServiceTemplate : invoiceFreightTemplate,
+    data,
+    { filename: isServiceInvoice ? invoiceServiceTemplatePath : invoiceFreightTemplatePath }
+  )
 
   const executablePath =
     process.env.PUPPETEER_EXECUTABLE_PATH ?? process.env.CHROME_PATH ?? undefined

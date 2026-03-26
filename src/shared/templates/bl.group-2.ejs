@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    margin: 20px;
+  }
+
+  .container {
+    max-width: 180mm;
+    margin: auto;
+  }
+
+  .header {
+    text-align: center;
+    border-bottom: 2px solid #000;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+  }
+
+  .header h1 {
+    margin: 0;
+    font-size: 16px;
+    letter-spacing: 2px;
+  }
+
+  .logo {
+    max-height: 35px;
+    margin-bottom: 5px;
+  }
+
+  .row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .col {
+    flex: 1;
+    border: 1px solid #000;
+    padding: 5px;
+  }
+
+  .label {
+    font-weight: bold;
+    font-size: 8px;
+    border-bottom: 1px solid #000;
+    margin-bottom: 3px;
+  }
+
+  .big {
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+  }
+
+  td {
+    border: 1px solid #000;
+    padding: 4px;
+  }
+
+  .signature {
+    height: 50px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+  }
+
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <div class="header">
+    <% if (logoUrl) { %>
+      <img src="<%= logoUrl %>" class="logo">
+    <% } %>
+    <h1>BILL OF LADING</h1>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <div class="label">SHIPPER</div>
+      <%= shipperName %><br>
+      <%= shipperAddress %><br>
+      CNPJ: <%= shipperCnpj %>
+    </div>
+
+    <div class="col">
+      <div class="label">CONSIGNEE</div>
+      <%= consigneeName %><br>
+      <%= consigneeAddress %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <div class="label">FORWARDING AGENT</div>
+      <%= brazilBiName %><br>
+      <%= brazilBiAddress %><br>
+      CNPJ: <%= brazilBiCnpj %>
+    </div>
+
+    <div class="col">
+      <div class="label">BOOKING / BL</div>
+      Booking: <span class="big"><%= bookingNo %></span><br>
+      BL: <span class="big"><%= blNumber %></span>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col"><div class="label">VESSEL</div><%= vessel %></div>
+    <div class="col"><div class="label">LOADING</div><%= portOfLoading %></div>
+    <div class="col"><div class="label">DISCHARGE</div><%= portOfDischarge %></div>
+  </div>
+
+  <div class="row">
+    <div class="col"><div class="label">RECEIPT</div><%= placeOfReceipt %></div>
+    <div class="col"><div class="label">DELIVERY</div><%= placeOfDelivery %></div>
+  </div>
+
+  <div class="col">
+    <div class="label">CARGO DESCRIPTION</div>
+    <%= containers %><br>
+    <%= containerType %><br><br>
+
+    <%= packages %> OF <%= description %><br>
+    NCM: <%= ncm %><br>
+    NET: <%= netWeight %> KGS
+  </div>
+
+  <div class="row">
+    <div class="col"><div class="label">GROSS WEIGHT</div><%= grossWeight %></div>
+    <div class="col"><div class="label">MEASUREMENT</div><%= measurement %></div>
+  </div>
+
+  <table>
+    <tr>
+      <td>ITEM</td>
+      <td>PREPAID</td>
+      <td>COLLECT</td>
+    </tr>
+    <tr>
+      <td>FREIGHT</td>
+      <td><%= currency %> <%= freightValue %></td>
+      <td></td>
+    </tr>
+  </table>
+
+  <div class="row" style="margin-top:10px;">
+    <div class="col">
+      <div class="label">DATES</div>
+      Issue: <%= documentDate || issueDate %><br>
+      On Board: <%= shippedOnBoardDate %>
+    </div>
+
+    <div class="col">
+      <div class="label">SIGNATURE</div>
+      <div class="signature">
+        <% if (signatureUrl) { %>
+          <img src="<%= signatureUrl %>" style="max-height:40px;">
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -317,6 +317,29 @@ export default function HomePage() {
                 />
                 <FormField
                   control={form.control}
+                  name="templateGroup"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Grupo de Template</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="default">Default</SelectItem>
+                          <SelectItem value="group-1">Grupo 1</SelectItem>
+                          <SelectItem value="group-2">Grupo 2</SelectItem>
+                          <SelectItem value="group-3">Grupo 3</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="currency"
                   render={({ field }) => (
                     <FormItem>
