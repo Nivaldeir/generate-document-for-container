@@ -77,7 +77,8 @@
 
     <div style="text-align:right;">
       <div class="title">INVOICE</div>
-      <div># <%= invoiceNumber %></div>
+      <div style="margin-top:4px;"># <%= invoiceNumber %></div>
+      <div style="color:#64748b;"><%= documentDate || invoiceDate %></div>
     </div>
   </div>
 
@@ -85,6 +86,9 @@
     <div class="label">Bill To</div>
     <strong><%= consigneeName %></strong><br>
     <%= consigneeAddress %>
+    <% if (blNumbers && blNumbers.length) { %>
+      <div style="margin-top:6px;color:#64748b;font-size:10px;">B/L: <%= blNumbers.join(', ') %></div>
+    <% } %>
   </div>
 
   <div class="card">

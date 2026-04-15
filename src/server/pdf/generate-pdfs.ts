@@ -89,62 +89,85 @@ function resolveTemplatePath(baseTemplateName: string, groupRaw: unknown): strin
   return fs.existsSync(groupedPath) ? groupedPath : path.join(TEMPLATES_DIR, baseTemplateName)
 }
 
+const PUPPETEER_ARGS = [
+  '--no-sandbox',
+  '--disable-setuid-sandbox',
+  '--disable-dev-shm-usage',
+  '--disable-gpu',
+  '--single-process',
+]
+
+const PDF_OPTIONS = {
+  format: 'A4' as const,
+  printBackground: true,
+  margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' },
+}
+
+function launchBrowser() {
+  const executablePath =
+    process.env.PUPPETEER_EXECUTABLE_PATH ?? process.env.CHROME_PATH ?? undefined
+  return puppeteer.launch({ headless: true, executablePath, args: PUPPETEER_ARGS })
+}
+
+function renderTemplate(templatePath: string, data: PdfFormData & { blNumber: string }): string {
+  const template = fs.readFileSync(templatePath, 'utf-8')
+  return ejs.render(template, data, { filename: templatePath })
+}
+
+export async function generateSinglePdf(
+  baseTemplateName: string,
+  formData: PdfFormData,
+): Promise<Buffer> {
+  const templatePath = resolveTemplatePath(baseTemplateName, formData.templateGroup)
+  const withImages = await resolveImageUrls(formData)
+  const data = templateData(withImages)
+  const html = renderTemplate(templatePath, data)
+
+  const browser = await launchBrowser()
+  try {
+    const page = await browser.newPage()
+    await page.setContent(html, { waitUntil: 'networkidle0' })
+    const pdf = await page.pdf(PDF_OPTIONS)
+    return Buffer.from(pdf)
+  } finally {
+    await browser.close()
+  }
+}
+
 export async function generatePdfs(formData: PdfFormData): Promise<PdfGenerationResult> {
+  const isServiceInvoice = formData.invoiceType === 'service'
+  const invoiceBase = isServiceInvoice ? 'invoice-service.ejs' : 'invoice.ejs'
+
   const blTemplatePath = resolveTemplatePath('bl.ejs', formData.templateGroup)
   const paymentTemplatePath = resolveTemplatePath('payment.ejs', formData.templateGroup)
-  const invoiceFreightTemplatePath = resolveTemplatePath('invoice.ejs', formData.templateGroup)
-  const invoiceServiceTemplatePath = resolveTemplatePath('invoice-service.ejs', formData.templateGroup)
-  const blTemplate = fs.readFileSync(blTemplatePath, 'utf-8')
-  const paymentTemplate = fs.readFileSync(paymentTemplatePath, 'utf-8')
-  const invoiceFreightTemplate = fs.readFileSync(invoiceFreightTemplatePath, 'utf-8')
-  const invoiceServiceTemplate = fs.readFileSync(invoiceServiceTemplatePath, 'utf-8')
+  const invoiceTemplatePath = resolveTemplatePath(invoiceBase, formData.templateGroup)
 
   const withImages = await resolveImageUrls(formData)
   const data = templateData(withImages)
-  const blHtml = ejs.render(blTemplate, data, { filename: blTemplatePath })
-  const paymentHtml = ejs.render(paymentTemplate, data, { filename: paymentTemplatePath })
-  const isServiceInvoice = formData.invoiceType === 'service'
-  const invoiceHtml = ejs.render(
-    isServiceInvoice ? invoiceServiceTemplate : invoiceFreightTemplate,
-    data,
-    { filename: isServiceInvoice ? invoiceServiceTemplatePath : invoiceFreightTemplatePath }
-  )
 
-  const executablePath =
-    process.env.PUPPETEER_EXECUTABLE_PATH ?? process.env.CHROME_PATH ?? undefined
-  const browser = await puppeteer.launch({
-    headless: true,
-    executablePath,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-gpu',
-      '--single-process',
-    ],
-  })
+  const blHtml = renderTemplate(blTemplatePath, data)
+  const paymentHtml = renderTemplate(paymentTemplatePath, data)
+  const invoiceHtml = renderTemplate(invoiceTemplatePath, data)
 
-  const pdfOptions = {
-    format: 'A4' as const,
-    printBackground: true,
-    margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' },
-  }
-
+  const browser = await launchBrowser()
   try {
-    const blPage = await browser.newPage()
-    await blPage.setContent(blHtml, { waitUntil: 'networkidle0' })
-    const blPdf = await blPage.pdf(pdfOptions)
-    await blPage.close()
+    const [blPage, paymentPage, invoicePage] = await Promise.all([
+      browser.newPage(),
+      browser.newPage(),
+      browser.newPage(),
+    ])
 
-    const paymentPage = await browser.newPage()
-    await paymentPage.setContent(paymentHtml, { waitUntil: 'networkidle0' })
-    const paymentPdf = await paymentPage.pdf(pdfOptions)
-    await paymentPage.close()
+    await Promise.all([
+      blPage.setContent(blHtml, { waitUntil: 'networkidle0' }),
+      paymentPage.setContent(paymentHtml, { waitUntil: 'networkidle0' }),
+      invoicePage.setContent(invoiceHtml, { waitUntil: 'networkidle0' }),
+    ])
 
-    const invoicePage = await browser.newPage()
-    await invoicePage.setContent(invoiceHtml, { waitUntil: 'networkidle0' })
-    const invoicePdf = await invoicePage.pdf(pdfOptions)
-    await invoicePage.close()
+    const [blPdf, paymentPdf, invoicePdf] = await Promise.all([
+      blPage.pdf(PDF_OPTIONS),
+      paymentPage.pdf(PDF_OPTIONS),
+      invoicePage.pdf(PDF_OPTIONS),
+    ])
 
     return {
       bl: Buffer.from(blPdf).toString('base64'),

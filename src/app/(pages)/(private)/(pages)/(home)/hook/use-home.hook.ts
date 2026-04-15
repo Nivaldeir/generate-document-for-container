@@ -4,182 +4,124 @@ import { DEFAULT_VALUES, formDocSchema, FormDocValues } from "../utils/home.util
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
 
+const POLL_INTERVAL_MS = 1_500
+const POLL_TIMEOUT_MS = 60_000
+
+async function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+async function pollJobUntilDone(jobId: string): Promise<void> {
+  const deadline = Date.now() + POLL_TIMEOUT_MS
+
+  while (Date.now() < deadline) {
+    const res = await fetch(`/api/generate-pdfs/${jobId}`)
+    if (!res.ok) throw new Error('Falha ao consultar status do job')
+
+    const job = await res.json()
+
+    if (job.status === 'COMPLETED') return
+    if (job.status === 'FAILED') throw new Error(job.error ?? 'Falha na geração dos PDFs')
+
+    await sleep(POLL_INTERVAL_MS)
+  }
+
+  throw new Error('Timeout: a geração demorou mais que o esperado. Verifique os documentos gerados.')
+}
+
 export function useHomeHook() {
-  const [uploadingLogo, setUploadingLogo] = useState(false)
-  const [uploadingSignature, setUploadingSignature] = useState(false)
   const [loading, setLoading] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [serviceLoading, setServiceLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [trackingOpen, setTrackingOpen] = useState(false)
+
   const form = useForm<FormDocValues>({
     resolver: zodResolver(formDocSchema),
     defaultValues: DEFAULT_VALUES as FormDocValues,
   })
 
-  const handleAssetChange = async (event: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'signature') => {
-    const file = event.target.files?.[0]
-    if (!file) return
-    if (!file.type.startsWith('image/')) return
-
-    if (type === 'logo') setUploadingLogo(true)
-    else setUploadingSignature(true)
-    try {
-      const formData = new FormData()
-      formData.append('type', type)
-      formData.append('file', file)
-      const res = await fetch('/api/upload-asset', { method: 'POST', body: formData })
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error ?? 'Falha no upload')
-      }
-      const { url } = await res.json()
-      if (url) {
-        if (type === 'logo') {
-          form.setValue('logoUrl', url)
-        } else {
-          form.setValue('signatureUrl', url)
-        }
-      }
-    } catch (e) {
-      console.error(e)
-      alert(e instanceof Error ? e.message : 'Erro ao enviar arquivo')
-    } finally {
-      if (type === 'logo') setUploadingLogo(false)
-      else setUploadingSignature(false)
+  const buildPayload = (data: FormDocValues) => {
+    const current = form.getValues()
+    return {
+      ...current,
+      ...data,
+      logoUrl: current.logoUrl ?? data.logoUrl ?? '',
+      signatureUrl: current.signatureUrl ?? data.signatureUrl ?? '',
     }
   }
 
   const onSubmit = async (data: FormDocValues) => {
-    if (loading) return
+    if (loading || processing) return
     setLoading(true)
     setSuccess(false)
+
     try {
-      const task = (async () => {
-        const currentValues = form.getValues()
-        const payload = {
-          ...currentValues,
-          ...data,
-          logoUrl: currentValues.logoUrl ?? data.logoUrl ?? '',
-          signatureUrl: currentValues.signatureUrl ?? data.signatureUrl ?? '',
-        }
-        const enqueueRes = await fetch('/api/generate-pdfs', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        })
-        if (!enqueueRes.ok) {
-          const err = await enqueueRes.json().catch(() => null)
-          throw new Error(err?.message ?? err?.error ?? 'Falha ao enfileirar geração de PDFs')
-        }
+      const payload = buildPayload(data)
 
-        await enqueueRes.json().catch(() => null)
+      // 1. Enfileira o job
+      const enqueueRes = await fetch('/api/generate-pdfs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (!enqueueRes.ok) {
+        const err = await enqueueRes.json().catch(() => null)
+        throw new Error(err?.message ?? err?.error ?? 'Falha ao enfileirar geração de PDFs')
+      }
+      const { jobId } = await enqueueRes.json()
 
-        let attempts = 0
-        let lastError: string | undefined
+      // 2. Dispara o worker uma vez
+      setLoading(false)
+      setProcessing(true)
 
-        while (attempts < 5) {
-          const workerRes = await fetch('/api/worker/process-pdf', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-          })
+      fetch('/api/worker/process-pdf', { method: 'POST' }).catch(() => null)
 
-          if (!workerRes.ok) {
-            const err = await workerRes.json().catch(() => null)
-            lastError = err?.error ?? 'Falha ao processar geração de PDFs'
-            break
-          }
+      // 3. Aguarda o job específico finalizar
+      await toast.promise(pollJobUntilDone(jobId), {
+        loading: 'Gerando PDFs...',
+        success: 'PDFs gerados com sucesso!',
+        error: (err) => err?.message ?? 'Erro ao gerar PDFs',
+      })
 
-          const workerJson = await workerRes.json().catch(() => null)
-          if (workerJson?.error) {
-            lastError = workerJson.error as string
-            break
-          }
-
-          if (!workerJson?.processed) {
-            attempts += 1
-            await new Promise((resolve) => setTimeout(resolve, 500))
-            continue
-          }
-
-          break
-        }
-
-        if (lastError) {
-          throw new Error(lastError)
-        }
-      })()
-
-      const minDelay = new Promise((resolve) => setTimeout(resolve, 2000))
-
-      await Promise.all([
-        toast.promise(task, {
-          loading: 'Gerando PDFs...',
-          success: 'PDFs gerados com sucesso!',
-          error: 'Erro ao gerar PDFs',
-        }),
-        minDelay,
-      ])
       setSuccess(true)
     } catch (error) {
-      console.error('[home] Erro ao processar requisição:', error)
-      alert(error instanceof Error ? error.message : 'Erro ao processar requisição')
+      toast.error(error instanceof Error ? error.message : 'Erro ao processar requisição')
     } finally {
       setLoading(false)
+      setProcessing(false)
     }
   }
 
   const onGenerateServiceInvoice = async (data: FormDocValues) => {
     if (serviceLoading) return
     setServiceLoading(true)
+
     try {
-      const currentValues = form.getValues()
-      const payload = {
-        ...currentValues,
-        ...data,
-        invoiceType: 'service' as const,
-        logoUrl: currentValues.logoUrl ?? data.logoUrl ?? '',
-        signatureUrl: currentValues.signatureUrl ?? data.signatureUrl ?? '',
-      }
+      const payload = { ...buildPayload(data), invoiceType: 'service' as const }
+
       const response = await fetch('/api/download-pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'invoice-service', data: payload }),
       })
+
       if (!response.ok) {
         const error = await response.json().catch(() => null)
         throw new Error(error?.details ?? error?.error ?? 'Falha ao gerar Invoice de Serviço')
       }
-      const { html } = await response.json()
-      const { default: jsPDF } = await import('jspdf')
-      const html2canvas = (await import('html2canvas')).default
 
-      const tempDiv = document.createElement('div')
-      tempDiv.innerHTML = html
-      tempDiv.style.position = 'absolute'
-      tempDiv.style.left = '-9999px'
-      tempDiv.style.width = '210mm'
-      document.body.appendChild(tempDiv)
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `Invoice-Servico-${payload.invoiceNumber}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
 
-      try {
-        const canvas = await html2canvas(tempDiv, {
-          scale: 2,
-          useCORS: true,
-          logging: false,
-        })
-        const imgData = canvas.toDataURL('image/png')
-        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-        const imgWidth = 210
-        const imgHeight = (canvas.height * imgWidth) / canvas.width
-        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight)
-        const filename = `Invoice-Servico-${payload.invoiceNumber}.pdf`
-        pdf.save(filename)
-      } finally {
-        document.body.removeChild(tempDiv)
-      }
+      toast.success('Invoice de Serviço gerada com sucesso!')
     } catch (error) {
-      console.error('[home] Erro ao gerar invoice de serviço:', error)
-      alert(error instanceof Error ? error.message : 'Erro ao gerar invoice de serviço')
+      toast.error(error instanceof Error ? error.message : 'Erro ao gerar invoice de serviço')
     } finally {
       setServiceLoading(false)
     }
@@ -187,16 +129,13 @@ export function useHomeHook() {
 
   return {
     form,
-    handleAssetChange,
-    uploadingLogo,
-    uploadingSignature,
     loading,
     processing,
     serviceLoading,
     success,
-    onSubmit,
-    onGenerateServiceInvoice,
     trackingOpen,
     setTrackingOpen,
+    onSubmit,
+    onGenerateServiceInvoice,
   }
 }

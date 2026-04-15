@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <style>
   body {
-    font-family: Arial, sans-serif;
+    font-family: Arial;
     font-size: 11px;
-    padding: 30px;
-    color: #222;
+    margin: 20px;
+    background: #0f172a;
+    color: #e2e8f0;
   }
 
   .container {
@@ -16,40 +17,34 @@
   }
 
   .top {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 16px;
     display: flex;
     justify-content: space-between;
-    margin-bottom: 30px;
+    align-items: flex-start;
   }
 
-  .logo {
-    max-height: 40px;
-    margin-bottom: 8px;
-  }
+  .logo { max-height: 40px; margin-bottom: 6px; }
 
-  .company-name {
-    font-weight: bold;
-    font-size: 14px;
-  }
-
-  .invoice-box {
-    text-align: right;
-  }
-
-  .invoice-title {
-    font-size: 24px;
+  .title {
+    font-size: 22px;
     font-weight: bold;
   }
 
-  .section {
-    margin-bottom: 20px;
+  .card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 12px;
+    margin-top: 12px;
   }
 
-  .section-title {
+  .label {
     font-weight: bold;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    font-size: 10px;
-    color: #666;
+    color: #60a5fa;
+    margin-bottom: 4px;
   }
 
   table {
@@ -58,29 +53,25 @@
   }
 
   th, td {
+    border: 1px solid #334155;
     padding: 8px;
-    border-bottom: 1px solid #ccc;
   }
 
   th {
-    text-align: left;
-    font-size: 10px;
-    color: #666;
+    background: #0f172a;
   }
 
   .total {
     text-align: right;
-    font-weight: bold;
+    font-size: 16px;
     margin-top: 10px;
+    font-weight: bold;
+    color: #60a5fa;
   }
 
-  .bank {
-    margin-top: 20px;
-    font-size: 10px;
-    border-top: 1px solid #ccc;
-    padding-top: 10px;
+  .bank-row {
+    margin-bottom: 4px;
   }
-
 </style>
 </head>
 
@@ -89,58 +80,61 @@
 
   <div class="top">
     <div>
-      <% if (logoUrl) { %>
-        <img src="<%= logoUrl %>" class="logo">
-      <% } %>
-      <div class="company-name"><%= brazilBiName %></div>
+      <% if (logoUrl) { %><img src="<%= logoUrl %>" class="logo"><% } %>
+      <div><strong><%= brazilBiName %></strong></div>
       <div><%= brazilBiAddress %></div>
       <div>CNPJ: <%= brazilBiCnpj %></div>
     </div>
 
-    <div class="invoice-box">
-      <div class="invoice-title">INVOICE</div>
-      <div># <%= invoiceNumber %></div>
+    <div style="text-align:right;">
+      <div class="title">INVOICE</div>
+      <div>No: <%= invoiceNumber %></div>
       <div><%= documentDate || invoiceDate %></div>
       <div><%= currency %></div>
     </div>
   </div>
 
-  <div class="section">
-    <div class="section-title">Bill To</div>
+  <div class="card">
+    <div class="label">CLIENT</div>
     <strong><%= consigneeName %></strong><br>
     <%= consigneeAddress %>
   </div>
 
-  <div class="section">
-    <div class="section-title">Service</div>
+  <% if (typeof serviceDescription !== 'undefined' && serviceDescription) { %>
+  <div class="card">
+    <div class="label">SERVICE</div>
     <%= serviceDescription %>
   </div>
+  <% } %>
 
-  <table>
-    <tr>
-      <th>Description</th>
-      <th>Qty</th>
-      <th>Unit</th>
-      <th>Total</th>
-    </tr>
-    <tr>
-      <td><%= description %></td>
-      <td>1</td>
-      <td><%= freightValue %></td>
-      <td><%= freightValue %></td>
-    </tr>
-  </table>
+  <div class="card">
+    <table>
+      <tr>
+        <th>Description</th>
+        <th>Qty</th>
+        <th>Currency</th>
+        <th style="text-align:right;">Amount</th>
+      </tr>
+      <tr>
+        <td><%= description %></td>
+        <td>1</td>
+        <td><%= currency %></td>
+        <td style="text-align:right;"><%= currency %> <%= freightValue %></td>
+      </tr>
+    </table>
 
-  <div class="total">
-    TOTAL: <%= currency %> <%= freightValue %>
+    <div class="total">TOTAL: <%= currency %> <%= freightValue %></div>
   </div>
 
-  <div class="bank">
-    <strong>Bank Details</strong><br>
-    <%= beneficiaryBank %><br>
-    <%= beneficiaryAddress %><br>
-    SWIFT: <%= swiftCode || swiftBic %><br>
-    Account: <%= accountNumber %>
+  <div class="card" style="font-size:10px;">
+    <div class="label">BANK DETAILS</div>
+    <% if (beneficiaryBank) { %><div class="bank-row"><strong>Bank:</strong> <%= beneficiaryBank %></div><% } %>
+    <% if (beneficiaryAddress) { %><div class="bank-row"><strong>Address:</strong> <%= beneficiaryAddress %></div><% } %>
+    <% if (swiftCode) { %><div class="bank-row"><strong>SWIFT:</strong> <%= swiftCode %></div><% } %>
+    <% if (typeof swiftBic !== 'undefined' && swiftBic) { %><div class="bank-row"><strong>SWIFT/BIC:</strong> <%= swiftBic %></div><% } %>
+    <% if (typeof intermediaryBank !== 'undefined' && intermediaryBank) { %><div class="bank-row"><strong>Intermediary:</strong> <%= intermediaryBank %></div><% } %>
+    <div class="bank-row"><strong>Account:</strong> <%= accountNumber %></div>
+    <% if (typeof routingNumber !== 'undefined' && routingNumber) { %><div class="bank-row"><strong>Routing:</strong> <%= routingNumber %></div><% } %>
   </div>
 
 </div>

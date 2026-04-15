@@ -67,6 +67,10 @@
     color: #60a5fa;
   }
 
+  .bank-row {
+    margin-bottom: 4px;
+  }
+
 </style>
 </head>
 
@@ -110,6 +114,17 @@
     </table>
 
     <div class="total">TOTAL: <%= currency %> <%= freightValue %></div>
+  </div>
+
+  <div class="card" style="font-size:10px;">
+    <div class="label" style="margin-bottom:6px;">BANK DETAILS</div>
+    <% if (beneficiaryBank) { %><div class="bank-row"><strong>Bank:</strong> <%= beneficiaryBank %></div><% } %>
+    <% if (beneficiaryAddress) { %><div class="bank-row"><strong>Address:</strong> <%= beneficiaryAddress %></div><% } %>
+    <% if (swiftCode) { %><div class="bank-row"><strong>SWIFT:</strong> <%= swiftCode %></div><% } %>
+    <% if (typeof swiftBic !== 'undefined' && swiftBic) { %><div class="bank-row"><strong>SWIFT/BIC:</strong> <%= swiftBic %></div><% } %>
+    <% if (typeof intermediaryBank !== 'undefined' && intermediaryBank) { %><div class="bank-row"><strong>Intermediary:</strong> <%= intermediaryBank %></div><% } %>
+    <div class="bank-row"><strong>Account:</strong> <%= accountNumber %></div>
+    <% if (typeof routingNumber !== 'undefined' && routingNumber) { %><div class="bank-row"><strong>Routing:</strong> <%= routingNumber %> / MEMO FIELD: <%= beneficiaryBank %> / <%= routingNumber %></div><% } %>
   </div>
 
 </div>
