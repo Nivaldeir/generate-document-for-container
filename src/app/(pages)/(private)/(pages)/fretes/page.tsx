@@ -296,27 +296,6 @@ export default function HomePage() {
                 />
                 <FormField
                   control={form.control}
-                  name="invoiceType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tipo de Invoice</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="freight">Frete</SelectItem>
-                          <SelectItem value="service">Serviço</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
                   name="templateGroup"
                   render={({ field }) => (
                     <FormItem>
