@@ -694,6 +694,28 @@ export default function HomePage() {
                     </>
                   )}
                 </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  className="flex-1"
+                  disabled={serviceLoading || loading || processing || form.getValues('invoiceType') !== 'service'}
+                  onClick={form.handleSubmit(
+                    onGenerateServiceInvoice as SubmitHandler<FormDocValues>
+                  )}
+                >
+                  {serviceLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Gerando Invoice de Serviço...
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="mr-2 h-5 w-5" />
+                      Gerar Invoice de Serviço
+                    </>
+                  )}
+                </Button>
               </div>
               {processing && (
                 <p className="text-sm text-muted-foreground flex items-center gap-2">

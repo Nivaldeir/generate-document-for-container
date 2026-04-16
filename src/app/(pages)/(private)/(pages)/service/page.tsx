@@ -425,71 +425,20 @@ export default function HomePage() {
               </CardContent>
             </Card>
 
-            {invoiceType === 'service' && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Descrição do Serviço</CardTitle>
-                  <CardDescription>Texto que aparecerá no topo da Invoice de serviço.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <FormField
-                    control={form.control}
-                    name="serviceDescription"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Descrição detalhada</FormLabel>
-                        <FormControl>
-                          <Textarea disabled={isFormDisabled} rows={4} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
-            )}
-
-
             <Card>
               <CardHeader>
-                <CardTitle>Dados do Shipper/Exportador</CardTitle>
-                <CardDescription>Informações do remetente da carga</CardDescription>
+                <CardTitle>Descrição do Serviço</CardTitle>
+                <CardDescription>Texto que aparecerá no topo da Invoice de serviço.</CardDescription>
               </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2">
+              <CardContent>
                 <FormField
                   control={form.control}
-                  name="shipperName"
+                  name="serviceDescription"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nome Completo</FormLabel>
+                      <FormLabel>Descrição detalhada</FormLabel>
                       <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="shipperCnpj"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>CNPJ</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="shipperAddress"
-                  render={({ field }) => (
-                    <FormItem className="sm:col-span-2">
-                      <FormLabel>Endereço Completo</FormLabel>
-                      <FormControl>
-                        <Textarea disabled={isFormDisabled} {...field} />
+                        <Textarea disabled={isFormDisabled} rows={4} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -497,183 +446,6 @@ export default function HomePage() {
                 />
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Dados de Transporte</CardTitle>
-                <CardDescription>Informações do BL e embarcação</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <FormField
-                  control={form.control}
-                  name="bookingNo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Booking No.</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <BlNumbersField />
-
-                <FormField
-                  control={form.control}
-                  name="vessel"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Navio/Viagem</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="portOfLoading"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Porto de Embarque</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="portOfDischarge"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Porto de Descarga</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="shippedOnBoardDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Data de Embarque</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Dados da Carga</CardTitle>
-                <CardDescription>Descrição e quantidades</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="containers"
-                  render={({ field }) => (
-                    <FormItem className="sm:col-span-2">
-                      <FormLabel>Containers</FormLabel>
-                      <FormControl>
-                        <Textarea disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="packages"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Pacotes</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descrição</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="ncm"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>NCM</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="netWeight"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Peso Líquido (KGS)</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="grossWeight"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Peso Bruto (KGS)</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="measurement"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Medida (CBM)</FormLabel>
-                      <FormControl>
-                        <Input disabled={isFormDisabled} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between max-w-md">
               <div className="flex flex-col gap-2 sm:flex-row sm:flex-1">
                 <Button
@@ -690,7 +462,29 @@ export default function HomePage() {
                   ) : (
                     <>
                       <FileText className="mr-2 h-5 w-5" />
-                      Gerar Documentos de Frete
+                      Gerar Invoice de Serviço
+                    </>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  className="flex-1"
+                  disabled={serviceLoading || loading || processing || form.getValues('invoiceType') !== 'service'}
+                  onClick={form.handleSubmit(
+                    onGenerateServiceInvoice as SubmitHandler<FormDocValues>
+                  )}
+                >
+                  {serviceLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Gerando...
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="mr-2 h-5 w-5" />
+                      Gerar
                     </>
                   )}
                 </Button>
