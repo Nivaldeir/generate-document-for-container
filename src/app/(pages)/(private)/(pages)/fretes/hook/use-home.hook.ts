@@ -32,9 +32,7 @@ async function pollJobUntilDone(jobId: string): Promise<void> {
 export function useHomeHook() {
   const [loading, setLoading] = useState(false)
   const [processing, setProcessing] = useState(false)
-  const [serviceLoading, setServiceLoading] = useState(false)
   const [success, setSuccess] = useState(false)
-  const [trackingOpen, setTrackingOpen] = useState(false)
 
   const form = useForm<FormDocValues>({
     resolver: zodResolver(formDocSchema),
@@ -59,7 +57,6 @@ export function useHomeHook() {
     try {
       const payload = buildPayload(data)
 
-      // 1. Enfileira o job
       const enqueueRes = await fetch('/api/generate-pdfs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -71,13 +68,11 @@ export function useHomeHook() {
       }
       const { jobId } = await enqueueRes.json()
 
-      // 2. Dispara o worker uma vez
       setLoading(false)
       setProcessing(true)
 
       fetch('/api/worker/process-pdf', { method: 'POST' }).catch(() => null)
 
-      // 3. Aguarda o job específico finalizar
       await toast.promise(pollJobUntilDone(jobId), {
         loading: 'Gerando PDFs...',
         success: 'PDFs gerados com sucesso!',
@@ -93,49 +88,11 @@ export function useHomeHook() {
     }
   }
 
-  const onGenerateServiceInvoice = async (data: FormDocValues) => {
-    if (serviceLoading) return
-    setServiceLoading(true)
-
-    try {
-      const payload = { ...buildPayload(data), invoiceType: 'service' as const }
-
-      const response = await fetch('/api/download-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'invoice-service', data: payload }),
-      })
-
-      if (!response.ok) {
-        const error = await response.json().catch(() => null)
-        throw new Error(error?.details ?? error?.error ?? 'Falha ao gerar Invoice de Serviço')
-      }
-
-      const blob = await response.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `Invoice-Servico-${payload.invoiceNumber}.pdf`
-      a.click()
-      URL.revokeObjectURL(url)
-
-      toast.success('Invoice de Serviço gerada com sucesso!')
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erro ao gerar invoice de serviço')
-    } finally {
-      setServiceLoading(false)
-    }
-  }
-
   return {
     form,
     loading,
     processing,
-    serviceLoading,
     success,
-    trackingOpen,
-    setTrackingOpen,
     onSubmit,
-    onGenerateServiceInvoice,
   }
 }

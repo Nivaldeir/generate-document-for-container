@@ -72,10 +72,33 @@ async function resolveImageUrls(formData: PdfFormData): Promise<PdfFormData> {
   }
 }
 
+const OPTIONAL_STRING_FIELDS = [
+  'beneficiaryBank', 'beneficiaryAddress', 'bankCode', 'branchCode',
+  'swiftCode', 'swiftBic', 'intermediaryBank', 'routingNumber',
+  'issueDate', 'paymentDate', 'invoiceDate', 'serviceDescription',
+  'placeOfDelivery', 'brazilBiCep', 'logoUrl', 'signatureUrl',
+  'correspondent', 'circular', 'bookingNo', 'vessel',
+  'portOfLoading', 'portOfDischarge', 'placeOfReceipt',
+]
+
+function normalizeData(formData: PdfFormData): PdfFormData {
+  const result = { ...formData }
+  for (const field of OPTIONAL_STRING_FIELDS) {
+    if (result[field] === undefined || result[field] === null) {
+      result[field] = ''
+    }
+  }
+  if (!Array.isArray(result.blNumbers)) {
+    result.blNumbers = []
+  }
+  return result
+}
+
 function templateData(formData: PdfFormData): PdfFormData & { blNumber: string } {
-  const blNumbers = Array.isArray(formData.blNumbers) ? (formData.blNumbers as string[]) : []
+  const normalized = normalizeData(formData)
+  const blNumbers = normalized.blNumbers as string[]
   const blNumber = blNumbers.length ? blNumbers.join(', ') : String((formData as { blNumber?: string }).blNumber ?? '')
-  return { ...formData, blNumber }
+  return { ...normalized, blNumber }
 }
 
 function resolveTemplatePath(baseTemplateName: string, groupRaw: unknown): string {

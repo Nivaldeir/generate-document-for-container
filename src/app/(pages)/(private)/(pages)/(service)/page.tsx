@@ -2,18 +2,11 @@
 
 import type { SubmitHandler } from 'react-hook-form'
 import { Button } from '@/src/shared/components/ui/button'
+
 import { Input } from '@/src/shared/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/shared/components/ui/card'
 import { Textarea } from '@/src/shared/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/src/shared/components/ui/select'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/src/shared/components/ui/dialog'
 import {
   Form,
   FormControl,
@@ -32,17 +25,10 @@ export default function HomePage() {
   const {
     form,
     onSubmit,
-    onGenerateServiceInvoice,
     loading,
-    processing,
-    serviceLoading,
-    success,
-    trackingOpen,
-    setTrackingOpen,
   } = useHomeHook()
 
-  const isFormDisabled = loading || processing || serviceLoading
-  const invoiceType = form.watch('invoiceType')
+  const isFormDisabled = loading
 
   return (
     <div className="p-4 sm:p-8">
@@ -425,87 +411,28 @@ export default function HomePage() {
                 />
               </CardContent>
             </Card>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between max-w-md">
-              <div className="flex flex-col gap-2 sm:flex-row sm:flex-1">
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="flex-1"
-                  disabled={loading || processing || serviceLoading}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Enfileirando...
-                    </>
-                  ) : (
-                    <>
-                      <FileText className="mr-2 h-5 w-5" />
-                      Gerar Invoice de Serviço
-                    </>
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="lg"
-                  className="flex-1"
-                  disabled={serviceLoading || loading || processing || form.getValues('invoiceType') !== 'service'}
-                  onClick={form.handleSubmit(
-                    onGenerateServiceInvoice as SubmitHandler<FormDocValues>
-                  )}
-                >
-                  {serviceLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Gerando...
-                    </>
-                  ) : (
-                    <>
-                      <FileText className="mr-2 h-5 w-5" />
-                      Gerar
-                    </>
-                  )}
-                </Button>
-              </div>
-              {processing && (
-                <p className="text-sm text-muted-foreground flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Gerando em segundo plano. Os documentos aparecerão em breve.
-                </p>
-              )}
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center max-w-md">
+              <Button
+                type="submit"
+                size="lg"
+                className="flex-1"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Gerando...
+                  </>
+                ) : (
+                  <>
+                    <FileText className="mr-2 h-5 w-5" />
+                    Gerar Invoice de Serviço
+                  </>
+                )}
+              </Button>
             </div>
           </form>
         </Form>
-        <Dialog open={trackingOpen} onOpenChange={setTrackingOpen}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>Rastreamento do B/L {form.watch('blNumbers')?.[0] ?? ''}</DialogTitle>
-              <DialogDescription>Resposta da API de rastreio (JSON bruto).</DialogDescription>
-            </DialogHeader>
-            <div className="mt-2">
-              <pre className="max-h-[320px] overflow-auto rounded bg-slate-950/90 p-3 text-xs text-slate-50">
-                {JSON.stringify(success, null, 2)}
-              </pre>
-            </div>
-            <DialogFooter>
-              <Button type="button" onClick={() => setTrackingOpen(false)}>
-                Fechar
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {success && (
-          <Card className="mt-8 border-green-200 bg-green-50">
-            <CardHeader>
-              <CardTitle className="text-green-900">Documentos gerados com sucesso</CardTitle>
-              <CardDescription className="text-green-700">
-                Os 3 documentos (BL com lista de B/Ls, Pagamento de Frete e Invoice) foram gerados e salvos. Acesse &quot;Listar Documentos&quot; no menu para visualizar ou baixar.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        )}
       </div>
     </div>
   )

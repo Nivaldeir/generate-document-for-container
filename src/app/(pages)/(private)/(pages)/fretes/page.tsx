@@ -7,14 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src
 import { Textarea } from '@/src/shared/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/src/shared/components/ui/select'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/src/shared/components/ui/dialog'
-import {
   Form,
   FormControl,
   FormField,
@@ -32,17 +24,12 @@ export default function HomePage() {
   const {
     form,
     onSubmit,
-    onGenerateServiceInvoice,
     loading,
     processing,
-    serviceLoading,
     success,
-    trackingOpen,
-    setTrackingOpen,
   } = useHomeHook()
 
-  const isFormDisabled = loading || processing || serviceLoading
-  const invoiceType = form.watch('invoiceType')
+  const isFormDisabled = loading || processing
 
   return (
     <div className="p-4 sm:p-8">
@@ -404,31 +391,6 @@ export default function HomePage() {
               </CardContent>
             </Card>
 
-            {invoiceType === 'service' && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Descrição do Serviço</CardTitle>
-                  <CardDescription>Texto que aparecerá no topo da Invoice de serviço.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <FormField
-                    control={form.control}
-                    name="serviceDescription"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Descrição detalhada</FormLabel>
-                        <FormControl>
-                          <Textarea disabled={isFormDisabled} rows={4} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
-            )}
-
-
             <Card>
               <CardHeader>
                 <CardTitle>Dados do Shipper/Exportador</CardTitle>
@@ -653,77 +615,34 @@ export default function HomePage() {
               </CardContent>
             </Card>
 
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between max-w-md">
-              <div className="flex flex-col gap-2 sm:flex-row sm:flex-1">
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="flex-1"
-                  disabled={loading || processing || serviceLoading}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Enfileirando...
-                    </>
-                  ) : (
-                    <>
-                      <FileText className="mr-2 h-5 w-5" />
-                      Gerar Documentos de Frete
-                    </>
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="lg"
-                  className="flex-1"
-                  disabled={serviceLoading || loading || processing || form.getValues('invoiceType') !== 'service'}
-                  onClick={form.handleSubmit(
-                    onGenerateServiceInvoice as SubmitHandler<FormDocValues>
-                  )}
-                >
-                  {serviceLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Gerando Invoice de Serviço...
-                    </>
-                  ) : (
-                    <>
-                      <FileText className="mr-2 h-5 w-5" />
-                      Gerar Invoice de Serviço
-                    </>
-                  )}
-                </Button>
-              </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center max-w-md">
+              <Button
+                type="submit"
+                size="lg"
+                className="flex-1"
+                disabled={loading || processing}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Enfileirando...
+                  </>
+                ) : (
+                  <>
+                    <FileText className="mr-2 h-5 w-5" />
+                    Gerar Documentos de Frete
+                  </>
+                )}
+              </Button>
               {processing && (
                 <p className="text-sm text-muted-foreground flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Gerando em segundo plano. Os documentos aparecerão em breve.
+                  Gerando em segundo plano...
                 </p>
               )}
             </div>
           </form>
         </Form>
-        <Dialog open={trackingOpen} onOpenChange={setTrackingOpen}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>Rastreamento do B/L {form.watch('blNumbers')?.[0] ?? ''}</DialogTitle>
-              <DialogDescription>Resposta da API de rastreio (JSON bruto).</DialogDescription>
-            </DialogHeader>
-            <div className="mt-2">
-              <pre className="max-h-[320px] overflow-auto rounded bg-slate-950/90 p-3 text-xs text-slate-50">
-                {JSON.stringify(success, null, 2)}
-              </pre>
-            </div>
-            <DialogFooter>
-              <Button type="button" onClick={() => setTrackingOpen(false)}>
-                Fechar
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
         {success && (
           <Card className="mt-8 border-green-200 bg-green-50">
             <CardHeader>
