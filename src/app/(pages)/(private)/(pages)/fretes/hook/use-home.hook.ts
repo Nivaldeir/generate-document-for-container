@@ -71,13 +71,18 @@ export function useHomeHook() {
       setLoading(false)
       setProcessing(true)
 
-      fetch('/api/worker/process-pdf', { method: 'POST' }).catch(() => null)
+      const workerRes = await fetch('/api/worker/process-pdf', { method: 'POST' })
+      if (!workerRes.ok) {
+        throw new Error('Falha ao iniciar o processamento dos PDFs. Tente novamente.')
+      }
 
-      await toast.promise(pollJobUntilDone(jobId), {
+      const pollPromise = pollJobUntilDone(jobId)
+      toast.promise(pollPromise, {
         loading: 'Gerando PDFs...',
         success: 'PDFs gerados com sucesso!',
         error: (err) => err?.message ?? 'Erro ao gerar PDFs',
       })
+      await pollPromise
 
       setSuccess(true)
     } catch (error) {

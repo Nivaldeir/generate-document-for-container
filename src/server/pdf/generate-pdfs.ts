@@ -34,11 +34,15 @@ async function urlToDataUrl(url: string): Promise<string> {
   if (isHttpUrl(url)) {
     try {
       const res = await fetch(url, { cache: 'no-store' })
-      if (!res.ok) return url
+      if (!res.ok) {
+        console.warn(`[generate-pdfs] Falha ao buscar imagem (${res.status}): ${url}`)
+        return url
+      }
       const buf = Buffer.from(await res.arrayBuffer())
       const contentType = res.headers.get('content-type') ?? 'image/png'
       return `data:${contentType};base64,${buf.toString('base64')}`
-    } catch {
+    } catch (err) {
+      console.warn(`[generate-pdfs] Erro ao buscar imagem: ${url}`, err)
       return url
     }
   }
@@ -51,7 +55,8 @@ async function urlToDataUrl(url: string): Promise<string> {
       const buf = fs.readFileSync(resolved)
       const mime = getMimeFromPath(resolved)
       return `data:${mime};base64,${buf.toString('base64')}`
-    } catch {
+    } catch (err) {
+      console.warn(`[generate-pdfs] Erro ao ler imagem local: ${url}`, err)
       return url
     }
   }
@@ -109,7 +114,11 @@ function resolveTemplatePath(baseTemplateName: string, groupRaw: unknown): strin
       ? baseTemplateName
       : `${baseTemplateName.replace('.ejs', '')}.${safeGroup}.ejs`
   const groupedPath = path.join(TEMPLATES_DIR, groupedTemplateName)
-  return fs.existsSync(groupedPath) ? groupedPath : path.join(TEMPLATES_DIR, baseTemplateName)
+  if (!fs.existsSync(groupedPath)) {
+    console.warn(`[generate-pdfs] Template "${groupedTemplateName}" não encontrado, usando fallback "${baseTemplateName}"`)
+    return path.join(TEMPLATES_DIR, baseTemplateName)
+  }
+  return groupedPath
 }
 
 const PUPPETEER_ARGS = [

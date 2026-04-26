@@ -78,24 +78,26 @@ export async function processNextPdfJob(): Promise<{ processed: boolean; jobId?:
     const paymentBuffer = Buffer.from(generated.payment, 'base64')
     const invoiceBuffer = Buffer.from(generated.invoice, 'base64')
 
-    const blUpload = await MinioS3.uploadWithUniqueName({
-      fileName: `BL-${blLabel}.pdf`,
-      buffer: blBuffer,
-      contentType: MIME_PDF,
-      prefix: 'documentos',
-    })
-    const paymentUpload = await MinioS3.uploadWithUniqueName({
-      fileName: `Pagamento-Frete-${invoiceNumber}.pdf`,
-      buffer: paymentBuffer,
-      contentType: MIME_PDF,
-      prefix: 'documentos',
-    })
-    const invoiceUpload = await MinioS3.uploadWithUniqueName({
-      fileName: `Invoice-${invoiceNumber}.pdf`,
-      buffer: invoiceBuffer,
-      contentType: MIME_PDF,
-      prefix: 'documentos',
-    })
+    const [blUpload, paymentUpload, invoiceUpload] = await Promise.all([
+      MinioS3.uploadWithUniqueName({
+        fileName: `BL-${blLabel}.pdf`,
+        buffer: blBuffer,
+        contentType: MIME_PDF,
+        prefix: 'documentos',
+      }),
+      MinioS3.uploadWithUniqueName({
+        fileName: `Pagamento-Frete-${invoiceNumber}.pdf`,
+        buffer: paymentBuffer,
+        contentType: MIME_PDF,
+        prefix: 'documentos',
+      }),
+      MinioS3.uploadWithUniqueName({
+        fileName: `Invoice-${invoiceNumber}.pdf`,
+        buffer: invoiceBuffer,
+        contentType: MIME_PDF,
+        prefix: 'documentos',
+      }),
+    ])
 
     await prisma.uploadedFile.createMany({
       data: [
