@@ -60,13 +60,17 @@
 <div class="container">
 
   <div class="header">
-    <% if (logoUrl) { %>
-      <div style="margin-bottom: 6px;">
-        <img src="<%= logoUrl %>" alt="Logo" style="max-height: 34px; max-width: 120px; object-fit: contain;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:6px;">
+      <div style="text-align:left;">
+        <strong><%= brazilBiName %></strong><br>
+        <%= brazilBiAddress %><br>
+        CNPJ: <%= brazilBiCnpj %>
       </div>
-    <% } %>
-    <strong>PAGAMENTO DE FRETE</strong><br>
-    Circular: <%= circular %> | <%= documentDate || paymentDate %>
+      <div style="text-align:right;">
+        <strong>PAGAMENTO DE FRETE</strong><br>
+        Circular: <%= circular %> | <%= documentDate || paymentDate %>
+      </div>
+    </div>
   </div>
 
   <div class="grid">
@@ -78,6 +82,7 @@
 
     <div class="section">
       <span class="label">Recebedor</span><br>
+      <% if (logoUrl) { %><img src="<%= logoUrl %>" alt="Logo" style="max-height:30px; max-width:100px; object-fit:contain; display:block; margin:4px 0;"><% } %>
       <%= consigneeName %><br>
       <%= consigneeAddress %>
     </div>
