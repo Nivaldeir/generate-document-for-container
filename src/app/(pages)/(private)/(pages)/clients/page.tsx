@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { trpc } from '@/src/shared/lib/trpc'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/src/shared/components/ui/card'
 import { Button } from '@/src/shared/components/ui/button'
@@ -25,6 +25,9 @@ import { Loader2, Users, Plus, Pencil } from 'lucide-react'
 import { useClients, clientFormDefaultValues } from './hooks/use-clients.hook'
 import type { ClientFormValues } from './hooks/use-clients.hook'
 import { ClientFormFields } from './_components/client-form-fields'
+import { TablePagination } from '@/src/shared/components/ui/table-pagination'
+
+const PAGE_SIZE = 10
 
 type ClientRow = {
   id: string
@@ -66,6 +69,7 @@ function clientToFormValues(c: ClientRow): ClientFormValues {
 export default function ClientsPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingClient, setEditingClient] = useState<ClientRow | null>(null)
+  const [page, setPage] = useState(1)
 
   const {
     form,
@@ -89,6 +93,12 @@ export default function ClientsPage() {
   })
 
   const isPending = isCreating || isUpdating
+
+  const totalPages = Math.ceil((clients as ClientRow[]).length / PAGE_SIZE)
+  const pagedClients = useMemo(
+    () => (clients as ClientRow[]).slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [clients, page]
+  )
 
   const openCreate = useCallback(() => {
     setEditingClient(null)
@@ -165,41 +175,51 @@ export default function ClientsPage() {
               </Button>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>CNPJ</TableHead>
-                  <TableHead>Endereço</TableHead>
-                  <TableHead className="w-[100px] text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {(clients as ClientRow[]).map((client) => (
-                  <TableRow
-                    key={client.id}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => openEdit(client)}
-                  >
-                    <TableCell className="font-medium">{client.name}</TableCell>
-                    <TableCell>{client.cnpj}</TableCell>
-                    <TableCell>{client.address}</TableCell>
-                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openEdit(client)}
-                        className="gap-1.5"
-                      >
-                        <Pencil className="h-4 w-4" />
-                        Editar
-                      </Button>
-                    </TableCell>
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>CNPJ</TableHead>
+                    <TableHead>Endereço</TableHead>
+                    <TableHead className="w-[100px] text-right">Ações</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {pagedClients.map((client) => (
+                    <TableRow
+                      key={client.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => openEdit(client)}
+                    >
+                      <TableCell className="font-medium">{client.name}</TableCell>
+                      <TableCell>{client.cnpj}</TableCell>
+                      <TableCell>{client.address}</TableCell>
+                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openEdit(client)}
+                          className="gap-1.5"
+                        >
+                          <Pencil className="h-4 w-4" />
+                          Editar
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <TablePagination
+                page={page}
+                totalPages={totalPages}
+                totalItems={(clients as ClientRow[]).length}
+                pageSize={PAGE_SIZE}
+                onPageChange={setPage}
+                itemLabel="clientes"
+              />
+            </>
           )}
         </div>
       </CardContent>

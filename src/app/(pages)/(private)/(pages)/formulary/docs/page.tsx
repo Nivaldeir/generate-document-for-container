@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import Link from 'next/link'  
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -17,6 +17,9 @@ import {
   TableRow,
 } from '@/src/shared/components/ui/table'
 import { FileText, Loader2, List, ExternalLink, Search } from 'lucide-react'
+import { TablePagination } from '@/src/shared/components/ui/table-pagination'
+
+const PAGE_SIZE = 10
 
 function formatBytes(bytes: number | null): string {
   if (bytes == null) return '—'
@@ -27,6 +30,7 @@ function formatBytes(bytes: number | null): string {
 
 export default function FormularyDocsPage() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [page, setPage] = useState(1)
 
   const { data: grupos = [], isLoading: listLoading } = trpc.documentos.list.useQuery()
 
@@ -44,6 +48,14 @@ export default function FormularyDocsPage() {
   }, [grupos, searchQuery])
 
   const totalDocumentos = grupos?.length ?? 0
+
+  useEffect(() => { setPage(1) }, [searchQuery])
+
+  const totalPages = Math.ceil(gruposFiltrados.length / PAGE_SIZE)
+  const pagedGrupos = useMemo(
+    () => gruposFiltrados.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [gruposFiltrados, page]
+  )
 
   return (
     <Card className="overflow-hidden">
@@ -117,7 +129,7 @@ export default function FormularyDocsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {gruposFiltrados.map((grupo: any) => {
+                {pagedGrupos.map((grupo: any) => {
                   const createdAt = new Date(grupo.createdAt)
                   const totalSize =
                     (grupo.bl?.sizeInBytes ?? 0) +
@@ -200,6 +212,14 @@ export default function FormularyDocsPage() {
                 })}
               </TableBody>
             </Table>
+            <TablePagination
+              page={page}
+              totalPages={totalPages}
+              totalItems={gruposFiltrados.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={setPage}
+              itemLabel="lotes"
+            />
           </div>
         )}
       </CardContent>
