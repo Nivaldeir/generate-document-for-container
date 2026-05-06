@@ -104,9 +104,8 @@
     <% if (typeof logoUrl !== 'undefined' && logoUrl) { %>
       <img src="<%= logoUrl %>" alt="Logo" class="brand-logo" />
     <% } %>
-    <div class="company-name"><%= brazilBiName %></div>
-    <div><%= brazilBiAddress %></div>
-    <div>CNPJ: <%= brazilBiCnpj %></div>
+    <div class="company-name"><%= consigneeName %></div>
+    <div><%= consigneeAddress %></div>
   </div>
 
   <div class="header">
@@ -123,10 +122,10 @@
     <div class="section">
       <div class="section-title">DADOS DO REMETENTE</div>
       <div class="info-row">
-        <span class="label"><%= brazilBiName %></span>
+        <span class="label"><%= consigneeName %></span>
       </div>
       <div class="info-row">
-        <span class="label">A/C NAME:</span> <%= consigneeName %>
+        <span class="label">A/C NAME:</span> <%= brazilBiName %>
       </div>
       <div class="info-row">
         <div><%= brazilBiAddress %></div>

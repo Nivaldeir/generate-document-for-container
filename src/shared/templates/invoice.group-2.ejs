@@ -72,7 +72,7 @@
   <div class="top">
     <div>
       <% if (logoUrl) { %><img src="<%= logoUrl %>" style="max-height:40px;"><% } %>
-      <div><strong><%= brazilBiName %></strong></div>
+      <div><strong><%= consigneeName %></strong></div>
     </div>
 
     <div style="text-align:right;">
@@ -84,8 +84,8 @@
 
   <div class="card">
     <div class="label">Bill To</div>
-    <strong><%= consigneeName %></strong><br>
-    <%= consigneeAddress %>
+    <strong><%= brazilBiName %></strong><br>
+    <%= brazilBiAddress %>
     <% if (blNumbers && blNumbers.length) { %>
       <div style="margin-top:6px;color:#64748b;font-size:10px;">B/L: <%= blNumbers.join(', ') %></div>
     <% } %>

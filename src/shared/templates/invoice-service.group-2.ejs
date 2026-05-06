@@ -78,9 +78,8 @@
   <div class="top">
     <div>
       <% if (logoUrl) { %><img src="<%= logoUrl %>" style="max-height:40px;margin-bottom:6px;display:block;"><% } %>
-      <div><strong><%= brazilBiName %></strong></div>
-      <div style="color:#64748b;font-size:10px;"><%= brazilBiAddress %></div>
-      <div style="color:#64748b;font-size:10px;">CNPJ: <%= brazilBiCnpj %></div>
+      <div><strong><%= consigneeName %></strong></div>
+      <div style="color:#64748b;font-size:10px;"><%= consigneeAddress %></div>
     </div>
 
     <div style="text-align:right;">
@@ -93,8 +92,9 @@
 
   <div class="card">
     <div class="label">Bill To</div>
-    <strong><%= consigneeName %></strong><br>
-    <%= consigneeAddress %>
+    <strong><%= brazilBiName %></strong><br>
+    <div style="color:#64748b;font-size:10px;"><%= brazilBiAddress %></div>
+    <div style="color:#64748b;font-size:10px;">CNPJ: <%= brazilBiCnpj %></div>
   </div>
 
   <% if (typeof serviceDescription !== 'undefined' && serviceDescription) { %>

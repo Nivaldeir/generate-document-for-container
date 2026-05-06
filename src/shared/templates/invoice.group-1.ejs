@@ -80,9 +80,8 @@
   <div class="top">
     <div>
       <% if (logoUrl) { %><img src="<%= logoUrl %>" class="logo"><% } %>
-      <div><strong><%= brazilBiName %></strong></div>
-      <div><%= brazilBiAddress %></div>
-      <div>CNPJ: <%= brazilBiCnpj %></div>
+      <div><strong><%= consigneeName %></strong></div>
+      <div><%= consigneeAddress %></div>
     </div>
 
     <div style="text-align:right;">
@@ -93,9 +92,10 @@
   </div>
 
   <div class="card">
-    <div class="label">CLIENT</div>
-    <strong><%= consigneeName %></strong><br>
-    <%= consigneeAddress %><br><br>
+    <div class="label">TO: </div>
+    <strong><%= brazilBiName %></strong><br>
+    <%= brazilBiAddress %><br>
+    CNPJ: <%= brazilBiCnpj %><br><br>
     B/L: <%= (blNumbers || []).join(', ') %>
   </div>
 

@@ -22,83 +22,91 @@
       margin: 0 auto;
     }
     .company-header {
-      text-align: left;
-      margin-bottom: 24px;
-      padding-bottom: 12px;
-      border-bottom: 2px solid #000;
-    }
-    .brand-logo {
-      max-height: 32px;
-      max-width: 72px;
-      object-fit: contain;
-      display: block;
-      margin-bottom: 6px;
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 3px solid #000;
     }
     .company-name {
-      font-size: 14px;
+      font-size: 16px;
       font-weight: bold;
-      margin-bottom: 2px;
+      margin-bottom: 5px;
     }
-    .company-line {
-      font-size: 10px;
+    .brand-logo {
+      max-height: 40px;
+      max-width: 80px;
+      object-fit: contain;
+      display: inline-block;
+      margin-bottom: 4px;
     }
     .invoice-header {
       display: grid;
-      grid-template-columns: 2fr 1.2fr;
-      gap: 24px;
-      margin-bottom: 24px;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
     }
     .invoice-title {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: bold;
       text-align: right;
     }
     .invoice-info {
       text-align: right;
-      font-size: 11px;
-    }
-    .label {
-      font-weight: bold;
     }
     .section {
-      margin-bottom: 18px;
-      font-size: 11px;
+      border: 2px solid #000;
+      padding: 15px;
+      margin-bottom: 20px;
     }
     .section-title {
       font-weight: bold;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      font-size: 11px;
+      font-size: 12px;
+      margin-bottom: 10px;
+      text-decoration: underline;
+    }
+    .info-row {
+      margin-bottom: 5px;
+    }
+    .label {
+      font-weight: bold;
+      display: inline-block;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 8px;
+      margin: 20px 0;
     }
     th {
       background-color: #f0f0f0;
-      border: 1px solid #000;
-      padding: 8px;
+      border: 2px solid #000;
+      padding: 10px;
       text-align: left;
-      font-size: 11px;
-    }
-    td {
-      border: 1px solid #000;
-      padding: 8px;
-      font-size: 11px;
-    }
-    .total-row td {
       font-weight: bold;
     }
-    .bank-info {
-      margin-top: 18px;
+    td {
+      border: 2px solid #000;
       padding: 10px;
-      border: 1px solid #000;
-      font-size: 10px;
+    }
+    .total-row {
+      font-weight: bold;
+      font-size: 13px;
+    }
+    .bank-info {
       background-color: #f9f9f9;
+      padding: 15px;
+      border: 2px solid #000;
+      margin-top: 20px;
+    }
+    .bank-title {
+      font-weight: bold;
+      font-size: 12px;
+      margin-bottom: 10px;
+      text-align: center;
+      text-transform: uppercase;
     }
     .footer-note {
-      margin-top: 18px;
+      margin-top: 30px;
+      padding: 10px;
       font-size: 10px;
       font-style: italic;
     }
@@ -106,93 +114,118 @@
 </head>
 <body>
   <div class="page-inner">
-    <div class="company-header">
-      <% if (typeof logoUrl !== 'undefined' && logoUrl) { %>
-        <img src="<%= logoUrl %>" alt="Logo" class="brand-logo" />
-      <% } %>
-      <div class="company-name"><%= brazilBiName %></div>
-      <div class="company-line"><%= brazilBiAddress %></div>
-      <div class="company-line">CNPJ: <%= brazilBiCnpj %></div>
-    </div>
-
-    <div class="invoice-header">
-      <div class="section">
-        <div class="section-title">Bill to</div>
-        <div style="font-weight: bold;"><%= consigneeName %></div>
-        <div><%= consigneeAddress %></div>
-      </div>
+  <div class="company-header">
+    <% if (typeof logoUrl !== 'undefined' && logoUrl) { %>
       <div>
-        <div class="invoice-title">INVOICE</div>
-        <div class="invoice-info" style="margin-top: 8px;">
-          <div><span class="label">Number:</span> <%= invoiceNumber %></div>
-          <div style="margin-top: 4px;"><span class="label">Date:</span> <%= typeof documentDate !== 'undefined' && documentDate ? documentDate : invoiceDate %></div>
-          <div style="margin-top: 4px;"><span class="label">Currency:</span> <%= currency %></div>
-        </div>
+        <img src="<%= logoUrl %>" alt="Logo" class="brand-logo" />
+      </div>
+    <% } %>
+    <div class="company-name"><%= consigneeName %></div>
+    <div><%= consigneeAddress %></div>
+  </div>
+
+  <div class="invoice-header">
+    <div>
+      <div class="section-title">TO:</div>
+      <div style="font-weight: bold; font-size: 13px;"><%= brazilBiName %></div>
+      <div style="margin-top: 5px;">
+        <div>IDENT CNPJ: <%= brazilBiCnpj %></div>
       </div>
     </div>
-
-    <div class="section">
-      <div class="section-title">Service details</div>
-      <% if (typeof serviceDescription !== 'undefined' && serviceDescription) { %>
-        <p style="margin-bottom: 8px;"><%= serviceDescription %></p>
-      <% } %>
-      <table>
-        <thead>
-          <tr>
-            <th style="width: 60%;">Description</th>
-            <th style="width: 10%;">Qty</th>
-            <th style="width: 15%;">Unit price</th>
-            <th style="width: 15%;">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><%= description %></td>
-            <td>1.00</td>
-            <td><%= freightValue %></td>
-            <td><%= freightValue %></td>
-          </tr>
-          <tr class="total-row">
-            <td colspan="3" style="text-align: right;">Total</td>
-            <td><%= currency %> <%= freightValue %></td>
-          </tr>
-        </tbody>
-      </table>
+    <div>
+      <div class="invoice-title">INVOICE</div>
+      <div class="invoice-info" style="margin-top: 10px;">
+        <div><strong>Invoice Nº</strong> <%= invoiceNumber %></div>
+        <div style="margin-top: 5px;"><strong>Date:</strong> <%= typeof documentDate !== 'undefined' && documentDate ? documentDate : invoiceDate %></div>
+        <% if (typeof blNumber !== 'undefined' && blNumber) { %>
+        <div style="margin-top: 5px;"><strong>B/L(s):</strong> <%= blNumber %></div>
+        <% } %>
+      </div>
     </div>
+  </div>
 
-    <div class="bank-info">
-      <div style="font-weight: bold; text-align: center; margin-bottom: 6px;">Bank details</div>
+  <div class="section">
+    <div style="font-weight: bold; margin-bottom: 10px;">
+      This Invoice is intended for the payment of international maritime freight for the following BLs (Bill of Ladings):
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 60%;">BL NUMBER</th>
+        <th style="width: 40%; text-align: right;">AMOUNT</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% (blNumbers || []).forEach(function(bl) { %>
+      <tr>
+        <td><%= bl %></td>
+        <td style="text-align: right;"><%= currency %> <%= freightValue %></td>
+      </tr>
+      <% }); %>
+      <tr class="total-row">
+        <td>TOTAL</td>
+        <td style="text-align: right;"><%= currency %> <%= freightValue %></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="bank-info">
+    <div class="bank-title">The payment must be done in the beneficiary's account. Please check the bank and account information below:</div>
+    
+    <div style="margin-top: 15px;">
       <% if (beneficiaryBank) { %>
-        <div><span class="label">Beneficiary bank:</span> <%= beneficiaryBank %></div>
+      <div class="info-row">
+        <span class="label">BENEFICIARY BANK:</span> <%= beneficiaryBank %>
+      </div>
       <% } %>
       <% if (beneficiaryAddress) { %>
-        <div><span class="label">Bank address:</span> <%= beneficiaryAddress %></div>
+      <div class="info-row">
+        <span class="label">BANK ADD:</span> <%= beneficiaryAddress %>
+      </div>
       <% } %>
       <% if (typeof bankCode !== 'undefined' && bankCode) { %>
-        <div><span class="label">Bank code:</span> <%= bankCode %></div>
+      <div class="info-row">
+        <span class="label">BANK CODE:</span> <%= bankCode %>
+      </div>
       <% } %>
       <% if (typeof branchCode !== 'undefined' && branchCode) { %>
-        <div><span class="label">Branch code:</span> <%= branchCode %></div>
+      <div class="info-row">
+        <span class="label">BRANCH CODE:</span> <%= branchCode %>
+      </div>
       <% } %>
       <% if (swiftCode) { %>
-        <div><span class="label">SWIFT code:</span> <%= swiftCode %></div>
+      <div class="info-row">
+        <span class="label">SWIFT CODE:</span> <%= swiftCode %>
+      </div>
       <% } %>
       <% if (typeof swiftBic !== 'undefined' && swiftBic) { %>
-        <div><span class="label">SWIFT/BIC:</span> <%= swiftBic %></div>
+      <div class="info-row">
+        <span class="label">SWIFT/BIC:</span> <%= swiftBic %>
+      </div>
       <% } %>
       <% if (typeof intermediaryBank !== 'undefined' && intermediaryBank) { %>
-        <div><span class="label">Intermediary bank:</span> <%= intermediaryBank %></div>
+      <div class="info-row">
+        <span class="label">INTERMEDIARY BANK:</span> <%= intermediaryBank %>
+      </div>
       <% } %>
-      <div><span class="label">Account:</span> <%= accountNumber %></div>
+      <div class="info-row">
+        <span class="label">BENEFICIARY ACCOUNT:</span> <%= accountNumber %>
+      </div>
       <% if (typeof routingNumber !== 'undefined' && routingNumber) { %>
-      <div><span class="label">Routing:</span> <%= routingNumber %></div>
+      <div class="info-row">
+        <span class="label">Routing #:</span> <%= routingNumber %><% if (beneficiaryBank) { %> / MEMO FIELD: <%= beneficiaryBank %> / <%= routingNumber %><% } %>
+      </div>
       <% } %>
     </div>
+  </div>
 
-    <div class="footer-note">
-      This invoice refers to service fees only. No freight, B/L or container data is applicable.
+  <div class="footer-note">
+    <div style="text-align: center; font-weight: bold;">
+      Invoice Number: <%= invoiceNumber %>
     </div>
+  </div>
   </div>
 </body>
 </html>
-

@@ -120,17 +120,16 @@
         <img src="<%= logoUrl %>" alt="Logo" class="brand-logo" />
       </div>
     <% } %>
-    <div class="company-name"><%= brazilBiName %></div>
-    <div><%= brazilBiAddress %></div>
-    <div>CNPJ: <%= brazilBiCnpj %></div>
+    <div class="company-name"><%= consigneeName %></div>
+    <div><%= consigneeAddress %></div>
   </div>
 
   <div class="invoice-header">
     <div>
       <div class="section-title">TO:</div>
-      <div style="font-weight: bold; font-size: 13px;"><%= consigneeName %></div>
+      <div style="font-weight: bold; font-size: 13px;"><%= brazilBiName %></div>
       <div style="margin-top: 5px;">
-        <div><%= consigneeAddress %></div>
+        <div>IDENT CNPJ: <%= brazilBiCnpj %></div>
       </div>
     </div>
     <div>

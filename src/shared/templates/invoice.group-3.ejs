@@ -72,9 +72,8 @@
   <div class="left">
     <% if (logoUrl) { %><img src="<%= logoUrl %>" class="logo"><% } %>
 
-    <div><strong><%= brazilBiName %></strong></div>
-    <div><%= brazilBiAddress %></div>
-    <div>CNPJ: <%= brazilBiCnpj %></div>
+    <div><strong><%= consigneeName %></strong></div>
+    <div><%= consigneeAddress %></div>
 
     <div style="margin-top:20px;">
       <div>Invoice:</div>
@@ -89,8 +88,9 @@
     <div class="title">INVOICE</div>
 
     <div class="card">
-      <strong><%= consigneeName %></strong><br>
-      <%= consigneeAddress %>
+      <strong><%= brazilBiName %></strong><br>
+      <%= brazilBiAddress %><br>
+      CNPJ: <%= brazilBiCnpj %>
     </div>
 
     <div class="card">
