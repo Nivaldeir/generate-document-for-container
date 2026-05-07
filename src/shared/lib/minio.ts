@@ -34,6 +34,10 @@ export class MinioS3 {
     )
   }
 
+  static buildAssetUrl(objectName: string): string {
+    return `/api/asset?key=${encodeURIComponent(objectName)}`
+  }
+
   static async uploadWithFixedKey(params: {
     key: string
     buffer: Buffer
@@ -48,9 +52,7 @@ export class MinioS3 {
       params.buffer.length,
       { "Content-Type": params.contentType }
     )
-    const baseUrl = (process.env.MINIO_PUBLIC_URL ?? "").replace(/\/$/, "")
-    const url = baseUrl ? `${baseUrl}/${this.BUCKET}/${objectName}` : ""
-    return { objectName, url }
+    return { objectName, url: this.buildAssetUrl(objectName) }
   }
 
   static async uploadWithUniqueName(params: MinioUploadParams): Promise<MinioUploadResult> {
@@ -71,10 +73,24 @@ export class MinioS3 {
       { "Content-Type": params.contentType || "application/octet-stream" }
     )
 
-    const baseUrl = (process.env.MINIO_PUBLIC_URL ?? "").replace(/\/$/, "")
-    const url = baseUrl ? `${baseUrl}/${this.BUCKET}/${objectName}` : ""
+    return { objectName, url: this.buildAssetUrl(objectName) }
+  }
 
-    return { objectName, url }
+  static async statObject(objectName: string) {
+    return this.client.statObject(this.BUCKET, objectName)
+  }
+
+  static async getObjectBuffer(objectName: string): Promise<{ buffer: Buffer; contentType: string }> {
+    const stat = await this.statObject(objectName)
+    const stream = (await this.client.getObject(this.BUCKET, objectName)) as Readable
+    const chunks: Buffer[] = []
+    for await (const chunk of stream) {
+      chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk)
+    }
+    return {
+      buffer: Buffer.concat(chunks),
+      contentType: stat.metaData?.["content-type"] ?? "application/octet-stream",
+    }
   }
 
   static parseUrl(url: string): { bucket: string; objectName: string } | null {

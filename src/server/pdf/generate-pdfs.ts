@@ -2,6 +2,7 @@ import ejs from 'ejs'
 import fs from 'fs'
 import path from 'path'
 import puppeteer from 'puppeteer'
+import { MinioS3 } from '@/src/shared/lib/minio'
 
 const TEMPLATES_DIR = path.join(process.cwd(), 'src', 'shared', 'templates')
 
@@ -29,8 +30,25 @@ function getMimeFromPath(filePath: string): string {
   return mime[ext] ?? 'image/png'
 }
 
+function getAssetKeyFromUrl(url: string): string | null {
+  const match = url.match(/^\/api\/asset\?(.*)$/)
+  if (!match) return null
+  const params = new URLSearchParams(match[1])
+  return params.get('key')
+}
+
 async function urlToDataUrl(url: string): Promise<string> {
   if (!url || isDataUrl(url)) return url
+  const assetKey = getAssetKeyFromUrl(url)
+  if (assetKey) {
+    try {
+      const { buffer, contentType } = await MinioS3.getObjectBuffer(assetKey)
+      return `data:${contentType};base64,${buffer.toString('base64')}`
+    } catch (err) {
+      console.warn(`[generate-pdfs] Erro ao ler asset do MinIO: ${assetKey}`, err)
+      return url
+    }
+  }
   if (isHttpUrl(url)) {
     try {
       const res = await fetch(url, { cache: 'no-store' })
