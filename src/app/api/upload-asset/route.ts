@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
-import { randomUUID } from 'crypto'
+import { MinioS3 } from '@/src/shared/lib/minio'
 
 const ALLOWED_TYPES = ['logo', 'signature'] as const
-const UPLOAD_DIR = join(process.cwd(), 'public', 'upload')
-const ASSET_NAMES = { logo: 'logo', signature: 'signature' } as const
+type AssetType = (typeof ALLOWED_TYPES)[number]
+
+const PREFIX: Record<AssetType, string> = {
+  logo: 'assets/logos',
+  signature: 'assets/signatures',
+}
 
 function getExtension(mime: string): string {
   const map: Record<string, string> = {
@@ -21,7 +23,7 @@ function getExtension(mime: string): string {
 export async function POST(request: Request) {
   try {
     const formData = await request.formData()
-    const type = formData.get('type') as (typeof ALLOWED_TYPES)[number] | null
+    const type = formData.get('type') as AssetType | null
     const file = formData.get('file') as File | null
 
     if (!type || !ALLOWED_TYPES.includes(type)) {
@@ -36,13 +38,14 @@ export async function POST(request: Request) {
 
     const buffer = Buffer.from(await file.arrayBuffer())
     const ext = getExtension(file.type)
-    const filename = `${ASSET_NAMES[type]}-${Date.now()}-${randomUUID()}${ext}`
-    const filepath = join(UPLOAD_DIR, filename)
+    const fileName = `${type}${ext}`
 
-    await mkdir(UPLOAD_DIR, { recursive: true })
-    await writeFile(filepath, buffer)
-
-    const url = `/upload/${filename}`
+    const { url } = await MinioS3.uploadWithUniqueName({
+      fileName,
+      buffer,
+      contentType: file.type,
+      prefix: PREFIX[type],
+    })
 
     return NextResponse.json({ url })
   } catch (error) {

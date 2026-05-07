@@ -50,7 +50,7 @@ export function ConsigneeClientSelect() {
           <SelectContent>
             {clients.map((client) => (
               <SelectItem key={client.id} value={client.id}>
-                {client.name} — {client.cnpj}
+                {client.name}
               </SelectItem>
             ))}
           </SelectContent>
