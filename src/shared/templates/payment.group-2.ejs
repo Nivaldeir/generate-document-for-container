@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body {
+    font-family: Arial;
+    font-size: 11px;
+    margin: 0;
+  }
+
+  .top {
+    background: #1e3a8a;
+    color: white;
+    padding: 15px;
+  }
+
+  .container {
+    padding: 20px;
+  }
+
+  .title {
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  .box {
+    border: 1px solid #cbd5e1;
+    padding: 10px;
+    margin-top: 10px;
+  }
+
+  .label {
+    font-weight: bold;
+    color: #1e3a8a;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  td, th {
+    border: 1px solid #cbd5e1;
+    padding: 8px;
+  }
+
+  th {
+    background: #e0ecff;
+  }
+
+  .total {
+    text-align: right;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 10px;
+    color: #1e3a8a;
+  }
+
+</style>
+</head>
+
+<body>
+
+<div class="top">
+  <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+    <div>
+      <div style="font-weight:bold; font-size:13px;"><%= brazilBiName %></div>
+      <div style="font-size:10px; opacity:0.85;"><%= brazilBiAddress %></div>
+      <div style="font-size:10px; opacity:0.85;">CNPJ: <%= brazilBiCnpj %></div>
+    </div>
+    <div style="text-align:right;">
+      <div class="title">PAGAMENTO DE FRETE</div>
+      <div>Circular: <%= circular %> | <%= documentDate || paymentDate %></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="grid">
+    <div class="box">
+      <div class="label">Remetente</div>
+      <%= brazilBiName %><br>
+      CNPJ: <%= brazilBiCnpj %>
+    </div>
+
+    <div class="box">
+      <div class="label">Recebedor</div>
+      <% if (logoUrl) { %><img src="<%= logoUrl %>" alt="Logo" style="max-height:30px; max-width:100px; object-fit:contain; display:block; margin-bottom:4px;"><% } %>
+      <%= consigneeName %><br>
+      <%= consigneeAddress %>
+    </div>
+  </div>
+
+  <div class="box">
+    <table>
+      <tr>
+        <th>B/L</th>
+        <th>Incoterm</th>
+        <th>Valor</th>
+      </tr>
+
+      <% (blNumbers || []).forEach(function(bl) { %>
+      <tr>
+        <td><%= bl %></td>
+        <td><%= incoterm %></td>
+        <td><%= currency %> <%= freightValue %></td>
+      </tr>
+      <% }); %>
+    </table>
+
+    <div class="total">
+      TOTAL: <%= currency %> <%= freightValue %>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

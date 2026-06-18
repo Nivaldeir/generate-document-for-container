@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"e:\\\\Projetos\\\\form-generation-with-next-js\" -Recurse -Directory)",
+      "Bash(xargs ls -lh)"
+    ]
+  }
+}

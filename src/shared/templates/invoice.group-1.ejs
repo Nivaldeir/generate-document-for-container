@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body {
+    font-family: Arial;
+    font-size: 11px;
+    margin: 20px;
+    background: #0f172a;
+    color: #e2e8f0;
+  }
+
+  .container {
+    max-width: 170mm;
+    margin: auto;
+  }
+
+  .top {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .logo { max-height: 40px; }
+
+  .title {
+    font-size: 22px;
+    font-weight: bold;
+  }
+
+  .card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 12px;
+    margin-top: 12px;
+  }
+
+  .label {
+    font-weight: bold;
+    color: #60a5fa;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    border: 1px solid #334155;
+    padding: 8px;
+  }
+
+  th {
+    background: #0f172a;
+  }
+
+  .total {
+    text-align: right;
+    font-size: 16px;
+    margin-top: 10px;
+    font-weight: bold;
+    color: #60a5fa;
+  }
+
+  .bank-row {
+    margin-bottom: 4px;
+  }
+
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <div class="top">
+    <div>
+      <% if (logoUrl) { %><img src="<%= logoUrl %>" class="logo"><% } %>
+      <div><strong><%= consigneeName %></strong></div>
+      <div><%= consigneeAddress %></div>
+    </div>
+
+    <div style="text-align:right;">
+      <div class="title">INVOICE</div>
+      <div>No: <%= invoiceNumber %></div>
+      <div><%= documentDate || invoiceDate %></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label">TO: </div>
+    <strong><%= brazilBiName %></strong><br>
+    <%= brazilBiAddress %><br>
+    CNPJ: <%= brazilBiCnpj %><br><br>
+    B/L: <%= (blNumbers || []).join(', ') %>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr>
+        <th>Description</th>
+        <th>Currency</th>
+        <th style="text-align:right;">Amount</th>
+      </tr>
+      <tr>
+        <td>International Maritime Freight</td>
+        <td><%= currency %></td>
+        <td style="text-align:right;"><%= currency %> <%= freightValue %></td>
+      </tr>
+    </table>
+
+    <div class="total">TOTAL: <%= currency %> <%= freightValue %></div>
+  </div>
+
+  <div class="card" style="font-size:10px;">
+    <div class="label" style="margin-bottom:6px;">BANK DETAILS</div>
+    <% if (beneficiaryBank) { %><div class="bank-row"><strong>Bank:</strong> <%= beneficiaryBank %></div><% } %>
+    <% if (beneficiaryAddress) { %><div class="bank-row"><strong>Address:</strong> <%= beneficiaryAddress %></div><% } %>
+    <% if (swiftCode) { %><div class="bank-row"><strong>SWIFT:</strong> <%= swiftCode %></div><% } %>
+    <% if (typeof swiftBic !== 'undefined' && swiftBic) { %><div class="bank-row"><strong>SWIFT/BIC:</strong> <%= swiftBic %></div><% } %>
+    <% if (typeof intermediaryBank !== 'undefined' && intermediaryBank) { %><div class="bank-row"><strong>Intermediary:</strong> <%= intermediaryBank %></div><% } %>
+    <div class="bank-row"><strong>Account:</strong> <%= accountNumber %></div>
+    <% if (typeof routingNumber !== 'undefined' && routingNumber) { %><div class="bank-row"><strong>Routing:</strong> <%= routingNumber %> / MEMO FIELD: <%= beneficiaryBank %> / <%= routingNumber %></div><% } %>
+  </div>
+
+</div>
+</body>
+</html>

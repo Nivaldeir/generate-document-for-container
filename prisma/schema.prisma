@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String         @id @default(cuid())
+  email     String         @unique
+  password  String
+  name      String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt @default(now())
+  files     UploadedFile[]
+
+  @@map("users")
+}
+
+model UploadedFile {
+  id             String   @id @default(cuid())
+  filename       String
+  originalName   String?
+  mimeType       String?
+  sizeInBytes    Int?
+  batchId        String?
+  kind           String?
+  containerCount Int?
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+
+  @@map("uploaded_files")
+}
+
+model PdfGenerationJob {
+  id          String    @id @default(cuid())
+  status      String    @default("PENDING")
+  batchId     String?
+  formData    String
+  result      String?
+  error       String?
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@map("pdf_generation_jobs")
+}
+
+model Client {
+  id                 String   @id @default(cuid())
+  name               String
+  cnpj               String
+  address            String
+  beneficiaryBank    String?
+  bankCode           String?
+  branchCode         String?
+  swiftCode          String?
+  swiftBic           String?
+  intermediaryBank   String?
+  accountNumber      String?
+  routingNumber      String?
+  beneficiaryAddress String?
+  logoUrl            String?
+  signatureUrl       String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt @default(now())
+
+  @@map("clients")
+}

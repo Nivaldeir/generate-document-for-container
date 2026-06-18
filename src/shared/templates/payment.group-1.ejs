@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body {
+    font-family: Arial;
+    font-size: 11px;
+    margin: 30px;
+    color: #1e293b;
+  }
+
+  .container {
+    max-width: 170mm;
+    margin: auto;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+
+  .logo { max-height: 40px; }
+
+  .title {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .section {
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-weight: bold;
+    margin-bottom: 6px;
+    color: #2563eb;
+  }
+
+  .card {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    background: #f1f5f9;
+    padding: 8px;
+    text-align: left;
+  }
+
+  td {
+    padding: 8px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .total {
+    text-align: right;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <div class="header">
+    <div>
+      <div><strong><%= brazilBiName %></strong></div>
+      <div><%= brazilBiAddress %></div>
+      <div>CNPJ: <%= brazilBiCnpj %></div>
+    </div>
+
+    <div style="text-align:right;">
+      <div class="title">PAGAMENTO DE FRETE</div>
+      <div>Circular: <%= circular %></div>
+      <div><%= documentDate %></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="section-title">Remetente</div>
+      <%= brazilBiName %><br>
+      <%= brazilBiAddress %><br>
+      CNPJ: <%= brazilBiCnpj %>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Recebedor</div>
+      <% if (logoUrl) { %><img src="<%= logoUrl %>" class="logo" style="margin-bottom:4px;"><br><% } %>
+      <%= consigneeName %><br>
+      <%= consigneeAddress %><br>
+      Account: <%= accountNumber %>
+    </div>
+  </div>
+
+  <div class="section">
+    <table>
+      <tr>
+        <th>B/L</th>
+        <th>Incoterm</th>
+        <th style="text-align:right;">Valor</th>
+      </tr>
+
+      <% (blNumbers || []).forEach(function(bl) { %>
+      <tr>
+        <td><%= bl %> - <%= vessel %></td>
+        <td><%= incoterm %></td>
+        <td style="text-align:right;"><%= currency %> <%= freightValue %></td>
+      </tr>
+      <% }); %>
+    </table>
+
+    <div class="total">TOTAL: <%= currency %> <%= freightValue %></div>
+  </div>
+
+</div>
+</body>
+</html>
