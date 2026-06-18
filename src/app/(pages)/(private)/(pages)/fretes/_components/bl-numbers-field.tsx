@@ -22,6 +22,7 @@ export function BlNumbersField() {
     control: form.control,
     name: 'blNumbers' as never,
   })
+<<<<<<< HEAD
   const { append: appendValue, remove: removeValue } = useFieldArray({
     control: form.control,
     name: 'blValues' as never,
@@ -29,6 +30,10 @@ export function BlNumbersField() {
   const { trackBl, handleOpenUsedModal } = useHomeAction()
   const [trackingIndex, setTrackingIndex] = useState<number | null>(null)
   const showValuePerBl = fields.length > 1
+=======
+  const { trackBl, handleOpenUsedModal } = useHomeAction()
+  const [trackingIndex, setTrackingIndex] = useState<number | null>(null)
+>>>>>>> e21d9274791a5edf073a4c6c141e17ae9c08ffb7
 
   const handleBlur = useCallback(
     async (index: number) => {
@@ -70,6 +75,7 @@ export function BlNumbersField() {
     <div className="sm:col-span-2 lg:col-span-3 space-y-3">
       <FormLabel>B/L Number(s)</FormLabel>
       {fields.map((field, i) => (
+<<<<<<< HEAD
         <div key={field.id} className="flex gap-2 items-start">
           <FormField
             control={form.control}
@@ -78,6 +84,17 @@ export function BlNumbersField() {
               <FormItem className="flex-1">
                 <FormControl>
                   <div className="relative">
+=======
+        <FormField
+          key={field.id}
+          control={form.control}
+          name={`blNumbers.${i}`}
+          render={({ field: f }) => (
+            <FormItem>
+              <FormControl>
+                <div className="flex gap-2 items-center">
+                  <div className="relative flex-1">
+>>>>>>> e21d9274791a5edf073a4c6c141e17ae9c08ffb7
                     <Input
                       {...f}
                       disabled={trackingIndex !== null}
@@ -94,6 +111,7 @@ export function BlNumbersField() {
                       </div>
                     )}
                   </div>
+<<<<<<< HEAD
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -132,15 +150,37 @@ export function BlNumbersField() {
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
+=======
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    disabled={fields.length <= 1}
+                    onClick={() => remove(i)}
+                    aria-label="Remover BL"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+>>>>>>> e21d9274791a5edf073a4c6c141e17ae9c08ffb7
       ))}
       <Button
         type="button"
         variant="outline"
         size="sm"
+<<<<<<< HEAD
         onClick={() => {
           append('')
           appendValue('')
         }}
+=======
+        onClick={() => append('')}
+>>>>>>> e21d9274791a5edf073a4c6c141e17ae9c08ffb7
         disabled={trackingIndex !== null}
       >
         <Plus className="h-4 w-4 mr-2" />

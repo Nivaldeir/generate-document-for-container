@@ -158,16 +158,27 @@
       </tr>
     </thead>
     <tbody>
+<<<<<<< HEAD
       <% var rowAmounts = typeof blAmounts !== 'undefined' ? blAmounts : []; %>
       <% (blNumbers || []).forEach(function(bl, i) { %>
       <tr>
         <td><%= bl %></td>
         <td style="text-align: right;"><%= currency %> <%= rowAmounts[i] || freightValue %></td>
+=======
+      <% (blNumbers || []).forEach(function(bl) { %>
+      <tr>
+        <td><%= bl %></td>
+        <td style="text-align: right;"><%= currency %> <%= freightValue %></td>
+>>>>>>> e21d9274791a5edf073a4c6c141e17ae9c08ffb7
       </tr>
       <% }); %>
       <tr class="total-row">
         <td>TOTAL</td>
+<<<<<<< HEAD
         <td style="text-align: right;"><%= currency %> <%= typeof freightTotal !== 'undefined' ? freightTotal : freightValue %></td>
+=======
+        <td style="text-align: right;"><%= currency %> <%= freightValue %></td>
+>>>>>>> e21d9274791a5edf073a4c6c141e17ae9c08ffb7
       </tr>
     </tbody>
   </table>

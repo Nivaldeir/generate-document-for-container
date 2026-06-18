@@ -12,7 +12,10 @@ export const formDocSchema = z.object({
   brazilBiCnpj: z.string(),
   bookingNo: z.string(),
   blNumbers: z.array(z.string().min(1)).min(1),
+<<<<<<< HEAD
   blValues: z.array(z.string()).optional(),
+=======
+>>>>>>> e21d9274791a5edf073a4c6c141e17ae9c08ffb7
   containerCount: z.coerce.number().int().min(1).optional(),
   vessel: z.string(),
   portOfLoading: z.string(),
@@ -68,7 +71,10 @@ export const DEFAULT_VALUES = {
   brazilBiCnpj: '54.438.731/0001-42',
   bookingNo: 'MEDUOK815514001US',
   blNumbers: ['MEDUOK815514001US'],
+<<<<<<< HEAD
   blValues: ['17.494,26'],
+=======
+>>>>>>> e21d9274791a5edf073a4c6c141e17ae9c08ffb7
   containerCount: 6,
   vessel: 'KURE - UA505A',
   portOfLoading: 'NORFOLK, VA',
