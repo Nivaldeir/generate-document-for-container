@@ -1,15 +1,18 @@
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { DEFAULT_VALUES, formDocSchema, FormDocValues } from "../utils/home.utils"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { toast } from "sonner"
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
+import {
+  DOCUMENT_FORM_DEFAULTS,
+  buildDocumentFormPayload,
+  documentFormSchema,
+  type DocumentFormValues,
+} from '@/src/shared/lib/document-form'
 
 const POLL_INTERVAL_MS = 1_500
 const POLL_TIMEOUT_MS = 60_000
 
-async function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 async function pollJobUntilDone(jobId: string): Promise<void> {
   const deadline = Date.now() + POLL_TIMEOUT_MS
@@ -19,7 +22,6 @@ async function pollJobUntilDone(jobId: string): Promise<void> {
     if (!res.ok) throw new Error('Falha ao consultar status do job')
 
     const job = await res.json()
-
     if (job.status === 'COMPLETED') return
     if (job.status === 'FAILED') throw new Error(job.error ?? 'Falha na geração dos PDFs')
 
@@ -34,28 +36,18 @@ export function useHomeHook() {
   const [processing, setProcessing] = useState(false)
   const [success, setSuccess] = useState(false)
 
-  const form = useForm<FormDocValues>({
-    resolver: zodResolver(formDocSchema),
-    defaultValues: DEFAULT_VALUES as FormDocValues,
+  const form = useForm<DocumentFormValues>({
+    resolver: zodResolver(documentFormSchema),
+    defaultValues: DOCUMENT_FORM_DEFAULTS,
   })
 
-  const buildPayload = (data: FormDocValues) => {
-    const current = form.getValues()
-    return {
-      ...current,
-      ...data,
-      logoUrl: current.logoUrl ?? data.logoUrl ?? '',
-      signatureUrl: current.signatureUrl ?? data.signatureUrl ?? '',
-    }
-  }
-
-  const onSubmit = async (data: FormDocValues) => {
+  const onSubmit = async (data: DocumentFormValues) => {
     if (loading || processing) return
     setLoading(true)
     setSuccess(false)
 
     try {
-      const payload = buildPayload(data)
+      const payload = buildDocumentFormPayload(form.getValues(), data)
 
       const enqueueRes = await fetch('/api/generate-pdfs', {
         method: 'POST',
@@ -72,9 +64,7 @@ export function useHomeHook() {
       setProcessing(true)
 
       const workerRes = await fetch('/api/worker/process-pdf', { method: 'POST' })
-      if (!workerRes.ok) {
-        throw new Error('Falha ao iniciar o processamento dos PDFs. Tente novamente.')
-      }
+      if (!workerRes.ok) throw new Error('Falha ao iniciar o processamento dos PDFs. Tente novamente.')
 
       const pollPromise = pollJobUntilDone(jobId)
       toast.promise(pollPromise, {
@@ -93,11 +83,5 @@ export function useHomeHook() {
     }
   }
 
-  return {
-    form,
-    loading,
-    processing,
-    success,
-    onSubmit,
-  }
+  return { form, loading, processing, success, onSubmit }
 }

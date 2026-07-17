@@ -2,13 +2,13 @@
 
 import { useCallback } from 'react'
 import { useFormContext } from 'react-hook-form'
-import type { FormDocValues } from '../utils/home.utils'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/src/shared/components/ui/select'
 import { FormControl, FormItem, FormLabel } from '@/src/shared/components/ui/form'
 import { trpc } from '@/src/shared/lib/trpc'
+import type { DocumentFormValues } from '@/src/shared/lib/document-form'
 
 export function ConsigneeClientSelect() {
-  const form = useFormContext<FormDocValues>()
+  const form = useFormContext<DocumentFormValues>()
   const { data: clients = [], isLoading } = trpc.clients.list.useQuery()
 
   const handleChange = useCallback(
@@ -30,7 +30,7 @@ export function ConsigneeClientSelect() {
       form.setValue('logoUrl', client.logoUrl ?? '', opts)
       form.setValue('signatureUrl', client.signatureUrl ?? '', opts)
     },
-    [clients, form]
+    [clients, form],
   )
 
   const disabled = isLoading || clients.length === 0
@@ -43,7 +43,9 @@ export function ConsigneeClientSelect() {
           <SelectTrigger>
             <SelectValue
               placeholder={
-                disabled ? 'Nenhum cliente cadastrado' : 'Selecione um cliente para preencher o Consignee'
+                disabled
+                  ? 'Nenhum cliente cadastrado'
+                  : 'Selecione um cliente para preencher o Consignee'
               }
             />
           </SelectTrigger>
@@ -59,4 +61,3 @@ export function ConsigneeClientSelect() {
     </FormItem>
   )
 }
-

@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { useFormContext, useFieldArray } from 'react-hook-form'
+import { useCallback, useState } from 'react'
+import { useFieldArray, useFormContext } from 'react-hook-form'
+import { Loader2, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/src/shared/components/ui/button'
 import { Input } from '@/src/shared/components/ui/input'
 import {
@@ -11,18 +12,16 @@ import {
   FormLabel,
   FormMessage,
 } from '@/src/shared/components/ui/form'
-import { Plus, Trash2 } from 'lucide-react'
-import { Loader2 } from 'lucide-react'
-import { useHomeAction } from '../hook/use-home.action'
-import type { FormDocValues } from '../utils/home.utils'
+import { useBlTracker } from '@/src/shared/hooks/use-bl-tracker'
+import type { DocumentFormValues } from '@/src/shared/lib/document-form'
 
 export function BlNumbersField() {
-  const form = useFormContext<FormDocValues>()
+  const form = useFormContext<DocumentFormValues>()
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'blNumbers' as never,
   })
-  const { trackBl, handleOpenUsedModal } = useHomeAction()
+  const { trackBl, openUsedBlModal } = useBlTracker()
   const [trackingIndex, setTrackingIndex] = useState<number | null>(null)
 
   const handleBlur = useCallback(
@@ -34,16 +33,16 @@ export function BlNumbersField() {
         const response = await trackBl(value)
         const initialCount = response?.numberContainer ?? 0
         if (response?.existed) {
-          handleOpenUsedModal(
+          openUsedBlModal(
             value,
             initialCount,
-            (number) =>
-              form.setValue('containerCount', number, {
+            (n) =>
+              form.setValue('containerCount', n, {
                 shouldValidate: true,
                 shouldDirty: true,
                 shouldTouch: true,
               }),
-            response?.destination ?? ''
+            response?.destination ?? '',
           )
         } else {
           form.setValue('containerCount', 1, {
@@ -58,7 +57,7 @@ export function BlNumbersField() {
         setTrackingIndex(null)
       }
     },
-    [form, trackBl, handleOpenUsedModal]
+    [form, trackBl, openUsedBlModal],
   )
 
   return (
@@ -132,9 +131,7 @@ export function BlNumbersField() {
                   {...field}
                   value={field.value ?? ''}
                   onChange={(e) =>
-                    field.onChange(
-                      e.target.value ? Number(e.target.value) : undefined
-                    )
+                    field.onChange(e.target.value ? Number(e.target.value) : undefined)
                   }
                 />
               </FormControl>

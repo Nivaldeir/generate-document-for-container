@@ -2,13 +2,13 @@
 
 import { useCallback } from 'react'
 import { useFormContext } from 'react-hook-form'
-import type { FormDocValues } from '../utils/home.utils'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/src/shared/components/ui/select'
 import { FormControl, FormItem, FormLabel } from '@/src/shared/components/ui/form'
 import { trpc } from '@/src/shared/lib/trpc'
+import type { DocumentFormValues } from '@/src/shared/lib/document-form'
 
-export function ConsigneeClientSelect() {
-  const form = useFormContext<FormDocValues>()
+export function BrazilBiSelect() {
+  const form = useFormContext<DocumentFormValues>()
   const { data: clients = [], isLoading } = trpc.clients.list.useQuery()
 
   const handleChange = useCallback(
@@ -16,8 +16,11 @@ export function ConsigneeClientSelect() {
       const client = clients.find((c) => c.id === value)
       if (!client) return
       const opts = { shouldDirty: true, shouldTouch: true } as const
-      form.setValue('consigneeName', client.name, opts)
-      form.setValue('consigneeAddress', client.address, opts)
+      form.setValue('brazilBiName', client.name, opts)
+      form.setValue('brazilBiCnpj', client.cnpj, opts)
+      form.setValue('brazilBiAddress', client.address, opts)
+      form.setValue('logoUrl', client.logoUrl ?? '', opts)
+      form.setValue('signatureUrl', client.signatureUrl ?? '', opts)
       form.setValue('beneficiaryBank', client.beneficiaryBank ?? '', opts)
       form.setValue('bankCode', client.bankCode ?? '', opts)
       form.setValue('branchCode', client.branchCode ?? '', opts)
@@ -27,30 +30,30 @@ export function ConsigneeClientSelect() {
       form.setValue('accountNumber', client.accountNumber ?? '', opts)
       form.setValue('routingNumber', client.routingNumber ?? '', opts)
       form.setValue('beneficiaryAddress', client.beneficiaryAddress ?? '', opts)
-      form.setValue('logoUrl', client.logoUrl ?? '', opts)
-      form.setValue('signatureUrl', client.signatureUrl ?? '', opts)
     },
-    [clients, form]
+    [clients, form],
   )
 
   const disabled = isLoading || clients.length === 0
 
   return (
     <FormItem className="sm:col-span-2">
-      <FormLabel>Cliente (preencher Dados do Consignee)</FormLabel>
+      <FormLabel>Perfil do agente (preencher automático)</FormLabel>
       <FormControl>
         <Select onValueChange={handleChange} disabled={disabled}>
           <SelectTrigger>
             <SelectValue
               placeholder={
-                disabled ? 'Nenhum cliente cadastrado' : 'Selecione um cliente para preencher o Consignee'
+                disabled
+                  ? 'Nenhum cliente cadastrado'
+                  : 'Selecione um cliente para preencher os dados'
               }
             />
           </SelectTrigger>
           <SelectContent>
             {clients.map((client) => (
               <SelectItem key={client.id} value={client.id}>
-                {client.name}
+                {client.name} — {client.cnpj}
               </SelectItem>
             ))}
           </SelectContent>
@@ -59,4 +62,3 @@ export function ConsigneeClientSelect() {
     </FormItem>
   )
 }
-

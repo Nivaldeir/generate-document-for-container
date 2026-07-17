@@ -1,23 +1,22 @@
-"use client"
+'use client'
 
-import { Input } from "@/src/shared/components/ui/input";
-import { PageTitle } from "@/src/shared/components/ui/page-title";
-import { ModalProps } from "@/src/shared/types/modal";
+import { Input } from '@/src/shared/components/ui/input'
+import { PageTitle } from '@/src/shared/components/ui/page-title'
+import type { ModalProps } from '@/src/shared/types/modal'
 
-interface UsedModalData {
+export type UsedBlModalData = {
   blNumber: string
   numberContainer?: number
   setNumberContainer: (value: number) => void
   name: string
 }
 
-export function UsedModal({ onClose, data }: ModalProps<UsedModalData>) {
+export function UsedBlModal({ onClose, data }: ModalProps<UsedBlModalData>) {
   if (!data) return null
   const { blNumber, numberContainer, setNumberContainer, name } = data
 
   return (
     <div className="flex flex-col gap-6 p-6 w-full max-w-md">
-      {/* Header */}
       <div className="flex flex-col gap-2">
         <PageTitle variant="h1" className="text-xl font-semibold">
           BL já utilizado
@@ -30,11 +29,8 @@ export function UsedModal({ onClose, data }: ModalProps<UsedModalData>) {
         </p>
       </div>
 
-      {/* Content */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium">
-          Quantidade de containers
-        </label>
+        <label className="text-sm font-medium">Quantidade de containers</label>
         <Input
           type="number"
           min={0}
@@ -47,21 +43,21 @@ export function UsedModal({ onClose, data }: ModalProps<UsedModalData>) {
         />
       </div>
 
-      {/* Footer */}
       <div className="flex justify-end gap-3 pt-2">
         <button
+          type="button"
           onClick={onClose}
           className="px-4 py-2 text-sm font-medium rounded-lg border hover:bg-muted transition"
         >
           Cancelar
         </button>
-
         <button
+          type="button"
           onClick={() => {
             setNumberContainer(numberContainer ?? 0)
             onClose()
           }}
-          className="px-4 py-2 text-sm font-medium rounded-lg bg-primary text-white hover:opacity-90 transition"
+          className="px-4 py-2 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition"
         >
           Confirmar
         </button>

@@ -1,6 +1,6 @@
-import { z } from "zod";
+import { z } from 'zod'
 
-export const formDocSchema = z.object({
+export const documentFormSchema = z.object({
   shipperName: z.string(),
   shipperAddress: z.string(),
   shipperCnpj: z.string(),
@@ -53,9 +53,9 @@ export const formDocSchema = z.object({
   signatureUrl: z.string().optional(),
 })
 
-export type FormDocValues = z.infer<typeof formDocSchema>
+export type DocumentFormValues = z.infer<typeof documentFormSchema>
 
-export const DEFAULT_VALUES = {
+export const DOCUMENT_FORM_DEFAULTS: DocumentFormValues = {
   shipperName: 'AGG ASSESSORIA LTDA',
   shipperAddress: 'R DOUTOR PAULO JOSE DE AZEVEDO BONAVIDES, 1008 - 11.445-490 - JARDIM ACAPULCO - GUARUJÁ - SP',
   shipperCnpj: '43.651.382/0001-26',
@@ -102,6 +102,18 @@ export const DEFAULT_VALUES = {
   issueDate: '02/10/2025',
   paymentDate: '3 DE DEZEMBRO DE 2025',
   invoiceDate: 'DEZ 3 2025',
-  invoiceType: 'freight' as const,
-  templateGroup: 'default' as const,
+  invoiceType: 'freight',
+  templateGroup: 'default',
+}
+
+export function buildDocumentFormPayload<T extends Pick<DocumentFormValues, 'logoUrl' | 'signatureUrl'>>(
+  current: T,
+  data: T,
+): T {
+  return {
+    ...current,
+    ...data,
+    logoUrl: current.logoUrl ?? data.logoUrl ?? '',
+    signatureUrl: current.signatureUrl ?? data.signatureUrl ?? '',
+  }
 }

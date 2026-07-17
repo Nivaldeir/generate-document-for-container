@@ -1,37 +1,121 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/shared/components/ui/card'
-import { FileText } from 'lucide-react'
-import { Login } from './_components/login'
+import { FileSearch, FileText, ShieldCheck, Sparkles } from 'lucide-react'
 import { Suspense } from 'react'
+import { Login } from './_components/login'
 
 export default function LoginPage() {
-
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMyMDIwMjAiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyem0wLTR2MkgyNHYtMmgxMnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-40" aria-hidden />
-      <Card className="w-full max-w-[400px] shadow-2xl border-slate-700/50 bg-slate-800/95 backdrop-blur-sm overflow-hidden">
-        <div className="h-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
-        <CardHeader className="space-y-3 pb-2 pt-8">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
-            <FileText className="h-7 w-7 text-white" />
+    <div className="min-h-screen grid lg:grid-cols-2 bg-background">
+      {/* Brand panel */}
+      <div className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-[oklch(0.22_0.04_172)] text-white p-12">
+        <div
+          className="absolute inset-0 opacity-90"
+          style={{
+            background:
+              'radial-gradient(circle at 20% 20%, oklch(0.55 0.14 172) 0%, transparent 55%), radial-gradient(circle at 80% 80%, oklch(0.45 0.14 200) 0%, transparent 55%), linear-gradient(135deg, oklch(0.20 0.05 172) 0%, oklch(0.16 0.04 220) 100%)',
+          }}
+        />
+        <div
+          className="absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+            backgroundSize: '24px 24px',
+          }}
+        />
+
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm ring-1 ring-white/15">
+            <FileText className="h-5 w-5" />
           </div>
-          <div className="space-y-1.5 text-center">
-            <CardTitle className="text-2xl font-semibold tracking-tight text-white">
-              Entrar
-            </CardTitle>
-            <CardDescription className="text-slate-400">
-              Sistema de Geração de Documentos
-            </CardDescription>
+          <span className="text-lg font-semibold tracking-tight">
+            Sistema de Geração de Documentos
+          </span>
+        </div>
+
+        <div className="relative z-10 space-y-8">
+          <div className="space-y-3">
+            <h1 className="text-4xl font-semibold leading-tight tracking-tight">
+              Documentos prontos
+              <br />
+              em segundos.
+            </h1>
+            <p className="text-base text-white/70 max-w-md">
+              Crie, organize e gere documentos personalizados a partir de
+              formulários inteligentes, com agilidade e total controlo.
+            </p>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-5 pb-8 pt-2">
+
+          <ul className="space-y-4 text-sm text-white/85">
+            <li className="flex items-start gap-3">
+              <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-md bg-white/10 backdrop-blur-sm ring-1 ring-white/15">
+                <Sparkles className="h-4 w-4" />
+              </span>
+              <div>
+                <p className="font-medium text-white">Geração automatizada</p>
+                <p className="text-white/65">
+                  Modelos dinâmicos preenchidos em segundos.
+                </p>
+              </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-md bg-white/10 backdrop-blur-sm ring-1 ring-white/15">
+                <FileSearch className="h-4 w-4" />
+              </span>
+              <div>
+                <p className="font-medium text-white">Histórico centralizado</p>
+                <p className="text-white/65">
+                  Localize e reutilize documentos a qualquer momento.
+                </p>
+              </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-md bg-white/10 backdrop-blur-sm ring-1 ring-white/15">
+                <ShieldCheck className="h-4 w-4" />
+              </span>
+              <div>
+                <p className="font-medium text-white">Acesso seguro</p>
+                <p className="text-white/65">
+                  Autenticação e permissões controladas por perfil.
+                </p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <p className="relative z-10 text-xs text-white/50">
+          © {new Date().getFullYear()} · Todos os direitos reservados
+        </p>
+      </div>
+
+      {/* Form panel */}
+      <div className="flex items-center justify-center p-6 sm:p-12">
+        <div className="w-full max-w-sm space-y-8">
+          <div className="lg:hidden flex justify-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[oklch(0.22_0.04_172)] text-white shadow-lg">
+              <FileText className="h-6 w-6" />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+              Bem-vindo de volta
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Aceda à plataforma de geração de documentos.
+            </p>
+          </div>
+
           <Suspense>
             <Login />
           </Suspense>
-          <p className="text-center text-xs text-slate-500">
-            Credenciais de teste: <span className="text-slate-400">admin@admin.com</span> / <span className="text-slate-400">admin</span>
+
+          <p className="text-center text-xs text-muted-foreground">
+            Credenciais de teste:{' '}
+            <span className="text-foreground/70">admin@admin.com</span> /{' '}
+            <span className="text-foreground/70">admin</span>
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }

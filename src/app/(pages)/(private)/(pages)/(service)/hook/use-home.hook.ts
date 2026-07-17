@@ -1,33 +1,28 @@
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { DEFAULT_VALUES, formDocSchema, FormDocValues } from "../utils/home.utils"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { toast } from "sonner"
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
+import {
+  DOCUMENT_FORM_DEFAULTS,
+  buildDocumentFormPayload,
+  documentFormSchema,
+  type DocumentFormValues,
+} from '@/src/shared/lib/document-form'
 
 export function useHomeHook() {
   const [loading, setLoading] = useState(false)
 
-  const form = useForm<FormDocValues>({
-    resolver: zodResolver(formDocSchema),
-    defaultValues: DEFAULT_VALUES as FormDocValues,
+  const form = useForm<DocumentFormValues>({
+    resolver: zodResolver(documentFormSchema),
+    defaultValues: DOCUMENT_FORM_DEFAULTS,
   })
 
-  const buildPayload = (data: FormDocValues) => {
-    const current = form.getValues()
-    return {
-      ...current,
-      ...data,
-      logoUrl: current.logoUrl ?? data.logoUrl ?? '',
-      signatureUrl: current.signatureUrl ?? data.signatureUrl ?? '',
-    }
-  }
-
-  const onSubmit = async (data: FormDocValues) => {
+  const onSubmit = async (data: DocumentFormValues) => {
     if (loading) return
     setLoading(true)
 
     try {
-      const payload = buildPayload(data)
+      const payload = buildDocumentFormPayload(form.getValues(), data)
 
       const response = await fetch('/api/generate-service-invoice', {
         method: 'POST',
@@ -56,9 +51,5 @@ export function useHomeHook() {
     }
   }
 
-  return {
-    form,
-    loading,
-    onSubmit,
-  }
+  return { form, loading, onSubmit }
 }
