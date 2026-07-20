@@ -203,15 +203,6 @@
                 <%= currency %>
                   <%= rowAmounts[i] || freightValue %>
               </td>
-              <% (blNumbers || []).forEach(function(bl) { %>
-            <tr>
-              <td>
-                <%= bl %>
-              </td>
-              <td style="text-align: right;">
-                <%= currency %>
-                  <%= freightValue %>
-              </td>
             </tr>
             <% }); %>
               <tr class="total-row">
@@ -219,10 +210,6 @@
                 <td style="text-align: right;">
                   <%= currency %>
                     <%= typeof freightTotal !=='undefined' ? freightTotal : freightValue %>
-                </td>
-                <td style="text-align: right;">
-                  <%= currency %>
-                    <%= freightValue %>
                 </td>
               </tr>
       </tbody>
