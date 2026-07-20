@@ -392,7 +392,6 @@ export default function HomePage() {
 
             <Card>
               <CardHeader>
-<<<<<<< HEAD
                 <CardTitle>B/L(s)</CardTitle>
                 <CardDescription>
                   Informe um ou mais B/Ls. Ao adicionar mais de um, informe o valor de cada BL — o total da invoice será a soma desses valores.
@@ -405,8 +404,6 @@ export default function HomePage() {
 
             <Card>
               <CardHeader>
-=======
->>>>>>> e21d9274791a5edf073a4c6c141e17ae9c08ffb7
                 <CardTitle>Descrição do Serviço</CardTitle>
                 <CardDescription>Texto que aparecerá no topo da Invoice de serviço.</CardDescription>
               </CardHeader>

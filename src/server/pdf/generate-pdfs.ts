@@ -3,10 +3,7 @@ import fs from 'fs'
 import path from 'path'
 import puppeteer from 'puppeteer'
 import { MinioS3 } from '@/src/shared/lib/minio'
-<<<<<<< HEAD
 import { formatLocaleNumber, parseLocaleNumber } from '@/src/shared/lib/money'
-=======
->>>>>>> e21d9274791a5edf073a4c6c141e17ae9c08ffb7
 
 const TEMPLATES_DIR = path.join(process.cwd(), 'src', 'shared', 'templates')
 
@@ -118,19 +115,15 @@ function normalizeData(formData: PdfFormData): PdfFormData {
   if (!Array.isArray(result.blNumbers)) {
     result.blNumbers = []
   }
-<<<<<<< HEAD
   if (!Array.isArray(result.blValues)) {
     result.blValues = []
   }
-=======
->>>>>>> e21d9274791a5edf073a4c6c141e17ae9c08ffb7
   return result
 }
 
 function templateData(formData: PdfFormData): PdfFormData & { blNumber: string } {
   const normalized = normalizeData(formData)
   const blNumbers = normalized.blNumbers as string[]
-<<<<<<< HEAD
   const blValues = normalized.blValues as string[]
   const freightValue = String(normalized.freightValue ?? '')
   const blNumber = blNumbers.length ? blNumbers.join(', ') : String((formData as { blNumber?: string }).blNumber ?? '')
@@ -139,10 +132,6 @@ function templateData(formData: PdfFormData): PdfFormData & { blNumber: string }
     ? formatLocaleNumber(blAmounts.reduce((sum, value) => sum + parseLocaleNumber(value), 0))
     : freightValue
   return { ...normalized, blNumber, blAmounts, freightTotal }
-=======
-  const blNumber = blNumbers.length ? blNumbers.join(', ') : String((formData as { blNumber?: string }).blNumber ?? '')
-  return { ...normalized, blNumber }
->>>>>>> e21d9274791a5edf073a4c6c141e17ae9c08ffb7
 }
 
 function resolveTemplatePath(baseTemplateName: string, groupRaw: unknown): string {
