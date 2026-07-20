@@ -154,7 +154,6 @@ const PUPPETEER_ARGS = [
   '--disable-setuid-sandbox',
   '--disable-dev-shm-usage',
   '--disable-gpu',
-  '--single-process',
 ]
 
 const PDF_OPTIONS = {
