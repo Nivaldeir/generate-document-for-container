@@ -3,7 +3,6 @@ import fs from 'fs'
 import path from 'path'
 import puppeteer from 'puppeteer'
 import { MinioS3 } from '@/src/shared/lib/minio'
-import { formatLocaleNumber, parseLocaleNumber } from '@/src/shared/lib/money'
 
 const TEMPLATES_DIR = path.join(process.cwd(), 'src', 'shared', 'templates')
 
@@ -128,10 +127,7 @@ function templateData(formData: PdfFormData): PdfFormData & { blNumber: string }
   const freightValue = String(normalized.freightValue ?? '')
   const blNumber = blNumbers.length ? blNumbers.join(', ') : String((formData as { blNumber?: string }).blNumber ?? '')
   const blAmounts = blNumbers.map((_, i) => (blValues[i]?.trim() ? blValues[i] : freightValue))
-  const freightTotal = blAmounts.length
-    ? formatLocaleNumber(blAmounts.reduce((sum, value) => sum + parseLocaleNumber(value), 0))
-    : freightValue
-  return { ...normalized, blNumber, blAmounts, freightTotal }
+  return { ...normalized, blNumber, blAmounts }
 }
 
 function resolveTemplatePath(baseTemplateName: string, groupRaw: unknown): string {
