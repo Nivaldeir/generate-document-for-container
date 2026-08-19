@@ -36,6 +36,10 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 COPY . .
 
+# DATABASE_URL placeholder só para o generate/build passar; será sobrescrito em runtime.
+ARG DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
+ENV DATABASE_URL=$DATABASE_URL
+
 RUN pnpm prisma generate
 
 RUN pnpm run build
