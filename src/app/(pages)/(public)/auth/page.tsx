@@ -27,9 +27,6 @@ export default function LoginPage() {
           <Suspense>
             <Login />
           </Suspense>
-          <p className="text-center text-xs text-slate-500">
-            Credenciais de teste: <span className="text-slate-400">admin@admin.com</span> / <span className="text-slate-400">admin</span>
-          </p>
         </CardContent>
       </Card>
     </div>
