@@ -59,19 +59,16 @@ export const useClients = () => {
     if (type === "logo") setUploadingLogo(true);
     else setUploadingSignature(true);
     try {
-      const formData = new FormData();
-      formData.append("type", type);
-      formData.append("file", file);
-      const res = await fetch("/api/upload-asset", { method: "POST", body: formData });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error ?? "Falha no upload");
-      }
-      const { url } = await res.json();
-      if (url) form.setValue(type === "logo" ? "logoUrl" : "signatureUrl", url);
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result ?? ""));
+        reader.onerror = () => reject(reader.error ?? new Error("Falha ao ler arquivo"));
+        reader.readAsDataURL(file);
+      });
+      form.setValue(type === "logo" ? "logoUrl" : "signatureUrl", dataUrl);
     } catch (e) {
       console.error(e);
-      alert(e instanceof Error ? e.message : "Erro ao enviar arquivo");
+      alert(e instanceof Error ? e.message : "Erro ao ler arquivo");
     } finally {
       if (type === "logo") setUploadingLogo(false);
       else setUploadingSignature(false);

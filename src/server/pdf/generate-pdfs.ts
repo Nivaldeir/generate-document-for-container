@@ -2,7 +2,6 @@ import ejs from 'ejs'
 import fs from 'fs'
 import path from 'path'
 import puppeteer from 'puppeteer'
-import { MinioS3 } from '@/src/shared/lib/minio'
 
 const TEMPLATES_DIR = path.join(process.cwd(), 'src', 'shared', 'templates')
 
@@ -14,8 +13,6 @@ export type PdfGenerationResult = {
   invoice: string
 }
 
-const PUBLIC_DIR = path.join(process.cwd(), 'public')
-
 function isDataUrl(str: string): boolean {
   return typeof str === 'string' && str.startsWith('data:')
 }
@@ -24,31 +21,8 @@ function isHttpUrl(str: string): boolean {
   return typeof str === 'string' && (str.startsWith('http://') || str.startsWith('https://'))
 }
 
-function getMimeFromPath(filePath: string): string {
-  const ext = path.extname(filePath).toLowerCase()
-  const mime: Record<string, string> = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.gif': 'image/gif', '.webp': 'image/webp' }
-  return mime[ext] ?? 'image/png'
-}
-
-function getAssetKeyFromUrl(url: string): string | null {
-  const match = url.match(/^\/api\/asset\?(.*)$/)
-  if (!match) return null
-  const params = new URLSearchParams(match[1])
-  return params.get('key')
-}
-
 async function urlToDataUrl(url: string): Promise<string> {
   if (!url || isDataUrl(url)) return url
-  const assetKey = getAssetKeyFromUrl(url)
-  if (assetKey) {
-    try {
-      const { buffer, contentType } = await MinioS3.getObjectBuffer(assetKey)
-      return `data:${contentType};base64,${buffer.toString('base64')}`
-    } catch (err) {
-      console.warn(`[generate-pdfs] Erro ao ler asset do MinIO: ${assetKey}`, err)
-      return url
-    }
-  }
   if (isHttpUrl(url)) {
     try {
       const res = await fetch(url, { cache: 'no-store' })
@@ -61,20 +35,6 @@ async function urlToDataUrl(url: string): Promise<string> {
       return `data:${contentType};base64,${buf.toString('base64')}`
     } catch (err) {
       console.warn(`[generate-pdfs] Erro ao buscar imagem: ${url}`, err)
-      return url
-    }
-  }
-  const pathname = url.startsWith('/') ? url.slice(1) : url
-  if (pathname.startsWith('upload/')) {
-    try {
-      const filePath = path.join(PUBLIC_DIR, pathname)
-      const resolved = path.resolve(filePath)
-      if (!resolved.startsWith(path.resolve(PUBLIC_DIR))) return url
-      const buf = fs.readFileSync(resolved)
-      const mime = getMimeFromPath(resolved)
-      return `data:${mime};base64,${buf.toString('base64')}`
-    } catch (err) {
-      console.warn(`[generate-pdfs] Erro ao ler imagem local: ${url}`, err)
       return url
     }
   }

@@ -1,7 +1,6 @@
 'use client'
 
-import React, { useMemo, useState, useEffect } from 'react'
-import Link from 'next/link'  
+import { useEffect, useMemo, useState } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { trpc } from '@/src/shared/lib/trpc'
@@ -16,45 +15,57 @@ import {
   TableHeader,
   TableRow,
 } from '@/src/shared/components/ui/table'
-import { FileText, Loader2, List, ExternalLink, Search } from 'lucide-react'
+import { FileText, Loader2, List, Search } from 'lucide-react'
 import { TablePagination } from '@/src/shared/components/ui/table-pagination'
 
 const PAGE_SIZE = 10
 
-function formatBytes(bytes: number | null): string {
-  if (bytes == null) return '—'
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+type JobRow = {
+  id: string
+  batchId: string | null
+  createdAt: string | Date
+  invoiceNumber: string
+  blLabel: string
+  invoiceType: string
+}
+
+function DownloadLink({ jobId, kind, label }: { jobId: string; kind: 'bl' | 'invoice' | 'payment'; label: string }) {
+  return (
+    <Button variant="link" className="h-auto p-0 text-sm font-normal" asChild>
+      <a
+        href={`/api/download-pdf?jobId=${encodeURIComponent(jobId)}&kind=${kind}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <FileText className="h-4 w-4 mr-1.5 text-muted-foreground" />
+        {label}
+      </a>
+    </Button>
+  )
 }
 
 export default function FormularyDocsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [page, setPage] = useState(1)
 
-  const { data: grupos = [], isLoading: listLoading } = trpc.documentos.list.useQuery()
+  const { data: jobs = [], isLoading } = trpc.documentos.list.useQuery()
 
-  const gruposFiltrados = useMemo(() => {
-    if (!grupos || grupos.length === 0) return []
-    if (!searchQuery.trim()) return grupos
+  const filtered = useMemo(() => {
+    const rows = (jobs as JobRow[]) ?? []
+    if (!searchQuery.trim()) return rows
     const q = searchQuery.trim().toLowerCase()
-    return grupos.filter((g: any) => {
-      const parts: string[] = []
-      if (g.bl?.originalName) parts.push(g.bl.originalName)
-      if (g.invoice?.originalName) parts.push(g.invoice.originalName)
-      if (g.payment?.originalName) parts.push(g.payment.originalName)
-      return parts.some((p) => p.toLowerCase().includes(q))
-    })
-  }, [grupos, searchQuery])
-
-  const totalDocumentos = grupos?.length ?? 0
+    return rows.filter((j) =>
+      [j.invoiceNumber, j.blLabel].some((s) => s.toLowerCase().includes(q))
+    )
+  }, [jobs, searchQuery])
 
   useEffect(() => { setPage(1) }, [searchQuery])
 
-  const totalPages = Math.ceil(gruposFiltrados.length / PAGE_SIZE)
-  const pagedGrupos = useMemo(
-    () => gruposFiltrados.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [gruposFiltrados, page]
+  const total = jobs.length
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const paged = useMemo(
+    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filtered, page]
   )
 
   return (
@@ -64,27 +75,27 @@ export default function FormularyDocsPage() {
           <div>
             <CardTitle className="flex items-center gap-2">
               <List className="h-5 w-5" />
-              Documentos salvos
+              Documentos gerados
             </CardTitle>
             <CardDescription className="mt-1">
-              Listagem dos arquivos em /upload. Clique no link para abrir ou baixar.
+              Os PDFs são gerados sob demanda a partir dos dados salvos. Clique em cada tipo para baixar.
             </CardDescription>
           </div>
-          {!listLoading && totalDocumentos > 0 && (
+          {!isLoading && total > 0 && (
             <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-              {totalDocumentos} {totalDocumentos === 1 ? 'lote de documentos' : 'lotes de documentos'}
+              {total} {total === 1 ? 'geração' : 'gerações'}
             </span>
           )}
         </div>
-        {!listLoading && totalDocumentos > 0 && (
+        {!isLoading && total > 0 && (
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Pesquisar por nome ou arquivo..."
+                placeholder="Pesquisar por invoice ou BL..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-9 bg-background"
+                className="pl-9 bg-background"
               />
             </div>
             {searchQuery && (
@@ -96,24 +107,20 @@ export default function FormularyDocsPage() {
         )}
       </CardHeader>
       <CardContent className="p-0">
-        {listLoading ? (
+        {isLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
-        ) : totalDocumentos === 0 ? (
+        ) : total === 0 ? (
           <div className="text-center py-16 text-muted-foreground">
             <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
-            <p className="font-medium">Nenhum documento cadastrado</p>
-            <p className="text-sm mt-1">Os arquivos gerados e salvos no servidor aparecerão aqui.</p>
+            <p className="font-medium">Nenhum documento gerado</p>
+            <p className="text-sm mt-1">Gere documentos em &quot;Serviços&quot; ou &quot;Fretes&quot; para vê-los aqui.</p>
           </div>
-        ) : gruposFiltrados.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground">
             <Search className="h-12 w-12 mx-auto mb-3 opacity-50" />
             <p className="font-medium">Nenhum resultado para &quot;{searchQuery}&quot;</p>
-            <p className="text-sm mt-1">Tente outro termo ou limpe a pesquisa.</p>
-            <Button variant="outline" size="sm" className="mt-3" onClick={() => setSearchQuery('')}>
-              Limpar pesquisa
-            </Button>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -121,91 +128,34 @@ export default function FormularyDocsPage() {
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="font-semibold w-40">Data</TableHead>
-                  <TableHead className="font-semibold">BL</TableHead>
-                  <TableHead className="font-semibold">Invoice</TableHead>
-                  <TableHead className="font-semibold">Pagamento</TableHead>
-                  <TableHead className="hidden sm:table-cell font-semibold w-24 text-right">Tamanho total</TableHead>
-                  <TableHead className="hidden md:table-cell font-semibold w-36">Enviado</TableHead>
+                  <TableHead className="font-semibold">Invoice #</TableHead>
+                  <TableHead className="font-semibold">BLs</TableHead>
+                  <TableHead className="font-semibold">Downloads</TableHead>
+                  <TableHead className="hidden md:table-cell font-semibold w-36">Gerado</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pagedGrupos.map((grupo: any) => {
-                  const createdAt = new Date(grupo.createdAt)
-                  const totalSize =
-                    (grupo.bl?.sizeInBytes ?? 0) +
-                    (grupo.invoice?.sizeInBytes ?? 0) +
-                    (grupo.payment?.sizeInBytes ?? 0)
-
+                {paged.map((job) => {
+                  const createdAt = new Date(job.createdAt)
                   return (
-                    <TableRow key={grupo.id} className="group">
+                    <TableRow key={job.id} className="group">
                       <TableCell className="align-top whitespace-nowrap text-sm text-muted-foreground">
                         {createdAt.toLocaleDateString('pt-BR')}<br />
                         <span className="text-xs">
                           {createdAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </TableCell>
+                      <TableCell className="align-top text-sm">{job.invoiceNumber || '—'}</TableCell>
+                      <TableCell className="align-top text-sm">{job.blLabel || '—'}</TableCell>
                       <TableCell className="align-top">
-                        {grupo.bl ? (
-                          <div className="flex items-center gap-2">
-                            <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                            <Button variant="link" className="h-auto p-0 text-sm font-normal" asChild>
-                              <Link
-                                href={`/api/documentos/download?filename=${encodeURIComponent(grupo.bl.filename)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                {grupo.bl.originalName || grupo.bl.filename}
-                              </Link>
-                            </Button>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="align-top">
-                        {grupo.invoice ? (
-                          <div className="flex items-center gap-2">
-                            <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                            <Button variant="link" className="h-auto p-0 text-sm font-normal" asChild>
-                              <Link
-                                href={`/api/documentos/download?filename=${encodeURIComponent(grupo.invoice.filename)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                {grupo.invoice.originalName || grupo.invoice.filename}
-                              </Link>
-                            </Button>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="align-top">
-                        {grupo.payment ? (
-                          <div className="flex items-center gap-2">
-                            <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                            <Button variant="link" className="h-auto p-0 text-sm font-normal" asChild>
-                              <Link
-                                href={`/api/documentos/download?filename=${encodeURIComponent(grupo.payment.filename)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                {grupo.payment.originalName || grupo.payment.filename}
-                              </Link>
-                            </Button>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="hidden sm:table-cell align-top text-right text-muted-foreground tabular-nums">
-                        {totalSize ? formatBytes(totalSize) : '—'}
+                        <div className="flex flex-wrap gap-x-3 gap-y-1">
+                          <DownloadLink jobId={job.id} kind="bl" label="BL" />
+                          <DownloadLink jobId={job.id} kind="invoice" label="Invoice" />
+                          <DownloadLink jobId={job.id} kind="payment" label="Pagamento" />
+                        </div>
                       </TableCell>
                       <TableCell className="hidden md:table-cell align-top text-muted-foreground text-sm">
-                        {formatDistanceToNow(createdAt, {
-                          addSuffix: true,
-                          locale: ptBR,
-                        })}
+                        {formatDistanceToNow(createdAt, { addSuffix: true, locale: ptBR })}
                       </TableCell>
                     </TableRow>
                   )
@@ -215,10 +165,10 @@ export default function FormularyDocsPage() {
             <TablePagination
               page={page}
               totalPages={totalPages}
-              totalItems={gruposFiltrados.length}
+              totalItems={filtered.length}
               pageSize={PAGE_SIZE}
               onPageChange={setPage}
-              itemLabel="lotes"
+              itemLabel="gerações"
             />
           </div>
         )}

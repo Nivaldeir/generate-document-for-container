@@ -33,6 +33,7 @@ export function useHomeHook() {
   const [loading, setLoading] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [lastJobId, setLastJobId] = useState<string | null>(null)
 
   const form = useForm<FormDocValues>({
     resolver: zodResolver(formDocSchema),
@@ -67,6 +68,7 @@ export function useHomeHook() {
         throw new Error(err?.message ?? err?.error ?? 'Falha ao enfileirar geração de PDFs')
       }
       const { jobId } = await enqueueRes.json()
+      setLastJobId(jobId)
 
       setLoading(false)
       setProcessing(true)
@@ -98,6 +100,7 @@ export function useHomeHook() {
     loading,
     processing,
     success,
+    lastJobId,
     onSubmit,
   }
 }

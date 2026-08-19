@@ -1,60 +1,44 @@
 import { router, publicProcedure } from '../trpc'
 
+type FormDataShape = {
+  invoiceNumber?: string
+  blNumbers?: string[]
+  invoiceType?: string
+}
+
 export const documentosRouter = router({
   list: publicProcedure.query(async ({ ctx }) => {
-    const files = await ctx.prisma.uploadedFile.findMany({
+    const jobs = await ctx.prisma.pdfGenerationJob.findMany({
+      where: { status: 'COMPLETED' },
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
-        filename: true,
-        originalName: true,
-        mimeType: true,
-        sizeInBytes: true,
-        createdAt: true,
         batchId: true,
-        kind: true,
+        formData: true,
+        createdAt: true,
+        completedAt: true,
       },
     })
 
-    type SimpleFile = (typeof files)[number]
-
-    const groups = new Map<string, {
-      id: string
-      batchId: string | null
-      createdAt: Date
-      bl?: SimpleFile
-      payment?: SimpleFile
-      invoice?: SimpleFile
-      others: SimpleFile[]
-    }>()
-
-    for (const file of files) {
-      const key = file.batchId ?? file.id
-      let group = groups.get(key)
-      if (!group) {
-        group = {
-          id: key,
-          batchId: file.batchId ?? null,
-          createdAt: file.createdAt,
-          others: [],
-        }
-        groups.set(key, group)
+    return jobs.map((job) => {
+      let form: FormDataShape = {}
+      try {
+        form = JSON.parse(job.formData) as FormDataShape
+      } catch {
+        form = {}
       }
-
-      const kind = file.kind
-      if (kind === 'bl') {
-        group.bl = file
-      } else if (kind === 'payment') {
-        group.payment = file
-      } else if (kind === 'invoice') {
-        group.invoice = file
-      } else {
-        group.others.push(file)
+      const blLabel = Array.isArray(form.blNumbers) && form.blNumbers.length
+        ? form.blNumbers.join(', ')
+        : ''
+      return {
+        id: job.id,
+        batchId: job.batchId,
+        createdAt: job.createdAt,
+        completedAt: job.completedAt,
+        invoiceNumber: form.invoiceNumber ?? '',
+        blLabel,
+        invoiceType: form.invoiceType ?? '',
       }
-    }
-
-    return Array.from(groups.values()).sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
-    )
+    })
   }),
 })

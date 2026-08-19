@@ -14,7 +14,7 @@ export async function GET(
     return NextResponse.json({
       id: job.id,
       status: job.status,
-      result: job.result ?? undefined,
+      batchId: job.batchId ?? undefined,
       error: job.error ?? undefined,
       createdAt: job.createdAt,
       completedAt: job.completedAt ?? undefined,

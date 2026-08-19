@@ -27,6 +27,7 @@ export default function HomePage() {
     loading,
     processing,
     success,
+    lastJobId,
   } = useHomeHook()
 
   const isFormDisabled = loading || processing
@@ -643,14 +644,40 @@ export default function HomePage() {
             </div>
           </form>
         </Form>
-        {success && (
+        {success && lastJobId && (
           <Card className="mt-8 border-green-200 bg-green-50">
             <CardHeader>
-              <CardTitle className="text-green-900">Documentos gerados com sucesso</CardTitle>
+              <CardTitle className="text-green-900">Documentos prontos para download</CardTitle>
               <CardDescription className="text-green-700">
-                Os 3 documentos (BL com lista de B/Ls, Pagamento de Frete e Invoice) foram gerados e salvos. Acesse &quot;Listar Documentos&quot; no menu para visualizar ou baixar.
+                Os dados foram salvos. Clique abaixo para gerar e baixar cada PDF.
               </CardDescription>
             </CardHeader>
+            <div className="flex flex-wrap gap-3 px-6 pb-6">
+              <a
+                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+                href={`/api/download-pdf?jobId=${encodeURIComponent(lastJobId)}&kind=bl`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Baixar BL
+              </a>
+              <a
+                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+                href={`/api/download-pdf?jobId=${encodeURIComponent(lastJobId)}&kind=invoice`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Baixar Invoice
+              </a>
+              <a
+                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+                href={`/api/download-pdf?jobId=${encodeURIComponent(lastJobId)}&kind=payment`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Baixar Pagamento
+              </a>
+            </div>
           </Card>
         )}
       </div>
